@@ -1,0 +1,57 @@
+<Page x:Name="pageRoot"
+    x:Class="MEmarket_UWP.CategoryPage"    
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:MEmarket_UWP"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid x:Name="LayoutRoot">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBox x:Name="SearchTextBox" 
+                 PlaceholderText="Поиск приложений"
+                 Grid.Row="0"
+                 Margin="12,8,12,8"
+                 TextChanged="SearchTextBox_TextChanged"
+                 />
+
+        <ListView x:Name="AppsListView" 
+                  Grid.Row="1"
+                  Margin="0,0,0,0"
+                  IsItemClickEnabled="True"
+                  ItemClick="AppsListView_ItemClick" VerticalAlignment="Stretch">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Image Source="{Binding Icon}" 
+                               Width="50" 
+                               Height="50" 
+                               Margin="0,0,8,0"
+                               ImageFailed="IconImage_ImageFailed"/>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="{Binding Name}" FontSize="18" VerticalAlignment="Center" 
+                                       />
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <ProgressRing x:Name="LoadingRing" 
+                      Grid.Row="1"
+                      IsActive="True" 
+                      HorizontalAlignment="Center" 
+                      VerticalAlignment="Center"/>
+    </Grid>
+
+</Page>

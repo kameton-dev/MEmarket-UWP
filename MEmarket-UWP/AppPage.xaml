@@ -1,0 +1,65 @@
+<Page x:Name="pageRoot"
+    x:Class="MEmarket_UWP.AppPage"    
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:MEmarket_UWP"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid x:Name="LayoutRoot">
+        <Grid Grid.Row="1" x:Name="ContentRoot">
+            <ScrollViewer>
+                <StackPanel Margin="12,12,12,0">
+                    <StackPanel Grid.Row="0" Margin="0,0,0,16" Orientation="Horizontal">
+                        <Image x:Name="AppIcon" Source="ms-appx:///Assets/StoreLogo.png" Width="80" Height="76" Margin="0,0,0,0" HorizontalAlignment="Left" ImageFailed="IconImage_ImageFailed"/>
+                        <StackPanel>
+                            <TextBlock x:Name="AppNameText" Text="Название приложения" Style="{ThemeResource TitleTextBlockStyle}" Margin="8,0,0,0" CharacterSpacing="{ThemeResource PivotHeaderItemCharacterSpacing}"/>
+                            <TextBlock x:Name="PublisherText" Text="Издатель" Style="{ThemeResource BodyTextBlockStyle}" FontSize="16" Margin="8,0,0,0"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <ComboBox x:Name="VersionComboBox" 
+                              PlaceholderText="выбрать версию" 
+                              Visibility="Collapsed" 
+                              SelectionChanged="VersionComboBox_SelectionChanged"
+                              DisplayMemberPath="Version"
+                              Margin="0,0,0,16"
+                              Header="Версия:">
+                    </ComboBox>
+                    <TextBlock x:Name="AppVersionText" Text="Версия: " Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,16" FontSize="16"/>
+
+                    <Button x:Name="DownloadButton" Content="Скачать" Click="Download_Click" Margin="0,0,0,8" HorizontalAlignment="Left" Width="150"/>
+
+                    <ProgressBar x:Name="DownloadProgressBar" Minimum="0" Maximum="100" Value="0" Height="5" Margin="0,0,0,8" Visibility="Collapsed"/>
+                    
+                    <TextBlock x:Name="DescriptionText" Text="Описание приложения" TextWrapping="Wrap" Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,16" FontSize="16"/>
+
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Margin="0,0,0,16" Visibility="Collapsed" x:Name="ScreenshotsScrollViewer">
+                        <ListView x:Name="ScreenshotsListView" Margin="0,0,0,0">
+                            <ListView.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ListView.ItemsPanel>
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Image Source="{Binding}" Width="225" Height="325" Margin="0,0,8,0" Stretch="UniformToFill" Tapped="Screenshot_Tapped" />
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </ScrollViewer>
+
+                    <TextBlock Text="Подробности" Margin="0,0,0,16" Style="{ThemeResource HeaderTextBlockStyle}" FontSize="22" Opacity="0.5"/>
+                    
+                    <TextBlock x:Name="TargetOsTextBlock" Text="Целевая платформа:" Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,0" FontSize="16" Visibility="Collapsed"/>
+                    <StackPanel x:Name="TargetOsPanel" Orientation="Horizontal" Margin="0,0,0,8" Visibility="Collapsed"></StackPanel>
+
+                    <TextBlock x:Name="AppSizeText" Text="Размер: " Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,8" FontSize="16"/>
+                    <TextBlock x:Name="MinVersionText" Text="Мин. версия: " Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,16" FontSize="16"/>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</Page>

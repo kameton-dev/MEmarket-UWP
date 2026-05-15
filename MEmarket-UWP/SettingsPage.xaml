@@ -1,0 +1,104 @@
+<Page
+    x:Class="MEmarket_UWP.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:MEmarket_UWP"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" FontFamily="Segoe UI Semilight">
+    
+
+    <Grid x:Name="LayoutRoot">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!--TODO: сделать шапку менее колхозней-->
+        <StackPanel Orientation="Horizontal" Background="{ThemeResource SystemControlBackgroundChromeMediumLowBrush}">
+            <Button x:Name="BackButton" 
+                            FontFamily="Segoe MDL2 Assets" 
+                            Content="&#xE10F;" 
+                            FontSize="20" 
+                            Width="48" Height="48" 
+                            Background="Transparent" 
+                            Click="BackButton_Click"/>
+            <TextBlock Text="НАСТРОЙКИ" VerticalAlignment="Center" Margin="0,0,0,0" FontSize="18" FontWeight="SemiBold"/>
+        </StackPanel>
+
+        <Pivot Grid.Row="1">
+            <PivotItem Header="Основные">
+                <StackPanel>
+                    <ToggleSwitch x:Name="toggleSwitch" Header="Показать приложения для WP8.1" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,8,0,16" Toggled="ToggleSwitch_Toggled"/>
+
+                    <Button Content="Очистить кэш" HorizontalAlignment="Left" VerticalAlignment="Top" Click="ClearCacheButton_Click"/>
+
+                </StackPanel>
+            </PivotItem>
+            
+            <PivotItem Header="Репозитории" Margin="0,0,0,0">
+                <Grid>
+                    <ScrollViewer>
+                        <StackPanel>
+                            <Grid Margin="12,8,12,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="RepositoryUrlTextBox" 
+                                 PlaceholderText="Введите URL репозитория..."
+                                 Grid.Column="0"
+                                 Margin="0,0,9.5,0"/>
+                                <Button x:Name="AddRepositoryButton"
+                                Grid.Column="1"
+                                Content="Добавить"
+                                Click="AddRepositoryButton_Click"
+                                MinWidth="100"/>
+                            </Grid>
+
+                            <ListView x:Name="RepositoriesListBox"
+                             Margin="0,0,0,16" Background="{x:Null}"
+                             IsItemClickEnabled="True"
+                             ItemClick="RepositoriesListBox_ItemClick">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,0,0,8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="{Binding Name}" 
+                                                   Style="{ThemeResource BodyTextBlockStyle}"
+                                                   FontWeight="Bold"/>
+                                                <TextBlock Text="{Binding Creator}" 
+                                                   Style="{ThemeResource CaptionTextBlockStyle}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </PivotItem>
+
+            <PivotItem Header="О программе">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="0,0,0,16">
+                        <Image Source="/Assets/StoreLogo.png" Width="60" Height="60" HorizontalAlignment="Left" Margin="0,0,8,0"/>
+                        <TextBlock Text="MEmarket UWP" VerticalAlignment="Center" FontSize="20" FontFamily="Segoe UI Semilight"/>
+                    </StackPanel>
+                    <TextBlock Text="Версия 0.0.2.0 Public Beta" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                    <TextBlock Text="MEmarket находится на этапе разработки. Возможны баги, зависания и микрофризы" Foreground="Red" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                    <TextBlock Text="© 2026 kameton.dev. Гойда ＼(°O°)／."
+                             Style="{ThemeResource BodyTextBlockStyle}"
+                             Opacity="0.6"/>
+                </StackPanel>
+            </PivotItem>
+        </Pivot>
+    </Grid>
+
+</Page>
