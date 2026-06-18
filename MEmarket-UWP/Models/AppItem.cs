@@ -6,6 +6,7 @@ namespace MEmarket_UWP.Models
     {
         public string Id { get; set; }
         public string Name { get; set; }
+        public string Summary { get; set; }
         public string Description { get; set; }
         public string Icon { get; set; }
         public string Publisher { get; set; }
@@ -16,7 +17,11 @@ namespace MEmarket_UWP.Models
         public string MinVersion { get; set; }
         public string Category { get; set; }
         public string BaseUrl { get; set; }
+        public string AppUrl { get; set; }
+        public string EntryJsonUrl { get; set; }
         public string OS { get; set; }
+        public string AppType { get; set; }
+        public List<string> Capabilities { get; set; } = new List<string>();
         public List<AppVersionInfo> Versions { get; set; } = new List<AppVersionInfo>();
         public List<string> Screenshots { get; set; } = new List<string>();
     }

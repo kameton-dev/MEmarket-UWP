@@ -45,7 +45,7 @@ namespace MEmarket_UWP
                 using (var httpClient = new HttpClient())
                 {
                     var cacheBuster = DateTime.Now.Ticks.ToString();
-                    var response = await httpClient.GetStringAsync(new Uri(url + "?v=" + cacheBuster));
+                    var response = await httpClient.GetStringAsync(new Uri(GetIndexUrl(url) + "?v=" + cacheBuster));
                     var root = JsonObject.Parse(response);
 
                     if (root.ContainsKey("repo_name") && root["repo_name"].ValueType == JsonValueType.String)
@@ -144,6 +144,17 @@ namespace MEmarket_UWP
             });
         }
 
+        private string GetIndexUrl(string repoRootUrl)
+        {
+            if (string.IsNullOrEmpty(repoRootUrl))
+                return string.Empty;
+
+            if (repoRootUrl.EndsWith("/"))
+                return repoRootUrl + "index.json";
+
+            return repoRootUrl + "/index.json";
+        }
+
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
             if (Frame.CanGoBack)
@@ -157,7 +168,7 @@ namespace MEmarket_UWP
             if (_currentRepository == null)
                 return;
 
-            if (_currentRepository.Url == "http://millenniummarket.ru/properties.json")
+            if (_currentRepository.Url == "http://millenniummarket.ru" || _currentRepository.Url == "http://millenniummarket.ru/properties.json")
             {
                 var dialog = new ContentDialog
                 {

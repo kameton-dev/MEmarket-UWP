@@ -17,23 +17,29 @@
         </Grid.RowDefinitions>
 
         <!--TODO: сделать шапку менее колхозней-->
-        <StackPanel Orientation="Horizontal" Background="{ThemeResource SystemControlBackgroundChromeMediumLowBrush}">
+        <RelativePanel Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}">
             <Button x:Name="BackButton" 
                             FontFamily="Segoe MDL2 Assets" 
                             Content="&#xE10F;" 
                             FontSize="20" 
                             Width="48" Height="48" 
                             Background="Transparent" 
-                            Click="BackButton_Click"/>
-            <TextBlock Text="НАСТРОЙКИ" VerticalAlignment="Center" Margin="0,0,0,0" FontSize="18" FontWeight="SemiBold"/>
-        </StackPanel>
+                            Click="BackButton_Click"
+                            RelativePanel.AlignLeftWithPanel="True"
+                            RelativePanel.AlignVerticalCenterWithPanel="True"/>
+            <TextBlock Text="Настройки" VerticalAlignment="Center" Margin="12,0,0,0" FontSize="18" FontWeight="SemiBold" RelativePanel.RightOf="BackButton" RelativePanel.AlignVerticalCenterWithPanel="True" />
+        </RelativePanel>
 
         <Pivot Grid.Row="1">
             <PivotItem Header="Основные">
                 <StackPanel>
-                    <ToggleSwitch x:Name="toggleSwitch" Header="Показать приложения для WP8.1" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,8,0,16" Toggled="ToggleSwitch_Toggled"/>
+                    <TextBlock Text="Показывать приложения:" Style="{ThemeResource BodyTextBlockStyle}" Margin="0,8,0,8" FontSize="16"/>
+                    <CheckBox x:Name="SilverlightCheckBox" Content="Silverlight [WP8.0-8.1]" HorizontalAlignment="Stretch" Margin="0,0,0,0" VerticalAlignment="Stretch" Checked="AppTypeFilter_Changed" Unchecked="AppTypeFilter_Changed"/>
+                    <CheckBox x:Name="WinRTCheckBox" Content="WinRT [WP8.1] (Подходит для W10M)" HorizontalAlignment="Stretch" Margin="0,0,0,0" VerticalAlignment="Stretch" Checked="AppTypeFilter_Changed" Unchecked="AppTypeFilter_Changed"/>
+                    <CheckBox x:Name="UwpCheckBox" Content="UWP [W10M]" HorizontalAlignment="Stretch" Margin="0,0,0,16" VerticalAlignment="Stretch" Checked="AppTypeFilter_Changed" Unchecked="AppTypeFilter_Changed"/>
 
                     <Button Content="Очистить кэш" HorizontalAlignment="Left" VerticalAlignment="Top" Click="ClearCacheButton_Click"/>
+                    
 
                 </StackPanel>
             </PivotItem>
@@ -87,11 +93,13 @@
 
             <PivotItem Header="О программе">
                 <StackPanel>
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="0,0,0,16">
-                        <Image Source="/Assets/StoreLogo.png" Width="60" Height="60" HorizontalAlignment="Left" Margin="0,0,8,0"/>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="0,7.7,0,16">
+                        <Border Background="{ThemeResource SystemControlBackgroundAccentBrush}" Margin="0,0,8,0" Padding="4,4,4,4">
+                        <Image Source="/Assets/StoreLogo.png" Width="60" Height="60" HorizontalAlignment="Left" Margin="0,0,0,0"/>
+                        </Border>
                         <TextBlock Text="MEmarket UWP" VerticalAlignment="Center" FontSize="20" FontFamily="Segoe UI Semilight"/>
                     </StackPanel>
-                    <TextBlock Text="Версия 0.0.2.0 Public Beta" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                    <TextBlock Text="Версия 0.0.3.0 Public Beta" TextWrapping="Wrap" Margin="0,0,0,8"/>
                     <TextBlock Text="MEmarket находится на этапе разработки. Возможны баги, зависания и микрофризы" Foreground="Red" TextWrapping="Wrap" Margin="0,0,0,8"/>
                     <TextBlock Text="© 2026 kameton.dev. Гойда ＼(°O°)／."
                              Style="{ThemeResource BodyTextBlockStyle}"

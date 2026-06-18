@@ -22,6 +22,7 @@ namespace MEmarket_UWP
     public sealed partial class SettingsPage : Page
     {
         private DataService _dataService;
+        private bool _isInitializing;
 
         public SettingsPage()
         {
@@ -34,7 +35,7 @@ namespace MEmarket_UWP
             _dataService = DataService.GetInstance();
             LoadRepositories();
             //LoadAndApplyTheme();
-            LoadWP81Setting();
+            LoadAppTypeSettings();
         }
 
         private void LoadRepositories()
@@ -111,15 +112,44 @@ namespace MEmarket_UWP
             }
         }
 
-        private void LoadWP81Setting()
+        private void LoadAppTypeSettings()
         {
-            toggleSwitch.IsOn = DataService.ShouldShowWP81Apps();
+            // Устанавливаем флаг перед тем, как менять значения программно
+            _isInitializing = true;
+
+            try
+            {
+                var localSettings = ApplicationData.Current.LocalSettings;
+                SilverlightCheckBox.IsChecked = GetBoolSetting(localSettings, "ShowAppTypeSilverlight", true);
+                WinRTCheckBox.IsChecked = GetBoolSetting(localSettings, "ShowAppTypeWinRT", true);
+                UwpCheckBox.IsChecked = GetBoolSetting(localSettings, "ShowAppTypeUWP", true);
+            }
+            finally
+            {
+                // Снимаем флаг в блоке finally, чтобы он гарантированно отключился после загрузки
+                _isInitializing = false;
+            }
         }
 
-        private void ToggleSwitch_Toggled(object sender, RoutedEventArgs e)
+        private void AppTypeFilter_Changed(object sender, RoutedEventArgs e)
         {
+            // Если сейчас происходит загрузка настроек, игнорируем срабатывание события
+            if (_isInitializing)
+                return;
+
             var localSettings = ApplicationData.Current.LocalSettings;
-            localSettings.Values["ShowWP81Apps"] = toggleSwitch.IsOn;
+            localSettings.Values["ShowAppTypeSilverlight"] = SilverlightCheckBox.IsChecked == true;
+            localSettings.Values["ShowAppTypeWinRT"] = WinRTCheckBox.IsChecked == true;
+            localSettings.Values["ShowAppTypeUWP"] = UwpCheckBox.IsChecked == true;
+
+            _dataService?.ClearCache();
+        }
+
+        private bool GetBoolSetting(ApplicationDataContainer localSettings, string key, bool defaultValue)
+        {
+            if (localSettings.Values.TryGetValue(key, out object value) && value is bool boolValue)
+                return boolValue;
+            return defaultValue;
         }
 
         private async void ClearCacheButton_Click(object sender, RoutedEventArgs e)

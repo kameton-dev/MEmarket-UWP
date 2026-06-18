@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Storage;
+using Windows.Storage.Pickers;
 using Windows.Storage.Streams;
 using Windows.System;
 using Windows.UI.Xaml;
@@ -20,6 +21,8 @@ using Windows.UI.Xaml.Navigation;
 using Windows.Web.Http;
 using MEmarket_UWP.Services;
 using MEmarket_UWP.Models;
+using Windows.Data.Json;
+using Windows.UI.Xaml.Documents;
 
 namespace MEmarket_UWP
 {
@@ -30,6 +33,7 @@ namespace MEmarket_UWP
         private AppVersionInfo _selectedVersion;
         private DispatcherTimer _downloadAnimationTimer;
         private int _downloadDotCount;
+        private bool _isDescriptionExpanded;
 
         public AppPage()
         {
@@ -39,7 +43,7 @@ namespace MEmarket_UWP
             _downloadAnimationTimer.Tick += DownloadAnimationTimer_Tick;
         }
 
-        protected override void OnNavigatedTo(NavigationEventArgs e)
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
 
@@ -48,6 +52,7 @@ namespace MEmarket_UWP
 
             if (_currentApp != null)
             {
+                await LoadEntryJsonAsync(_currentApp);
                 UpdateAppInfo();
             }
         }
@@ -57,9 +62,16 @@ namespace MEmarket_UWP
             if (_currentApp == null)
                 return;
 
+            _isDescriptionExpanded = false;
+
             AppNameText.Text = _currentApp.Name;
 
-            DescriptionText.Text = _currentApp.Description;
+            SummaryText.Text = string.IsNullOrEmpty(_currentApp.Summary) ? _currentApp.Description : _currentApp.Summary;
+
+            if (!string.IsNullOrEmpty(_currentApp.Description))
+            {
+                UpdateDescriptionText(_currentApp.Description);
+            }
 
             if (!string.IsNullOrEmpty(_currentApp.Icon))
             {
@@ -79,11 +91,11 @@ namespace MEmarket_UWP
 
             PublisherText.Text = $"{_currentApp.Publisher}";
 
-            AppSizeText.Text = $"Размер: {(_currentApp.Size ?? "Неизвестно")}";
+            /*AppSizeText.Text = $"Размер: {(_currentApp.Size ?? "Неизвестно")}";*/
 
             UpdateVersionDisplay();
             UpdateCertificateAndMinVersionDisplay();
-            UpdateTargetOsDisplay();
+            UpdateAppTypeDisplay();
 
             if (_currentApp.Screenshots != null && _currentApp.Screenshots.Count > 0)
             {
@@ -96,6 +108,222 @@ namespace MEmarket_UWP
             }
         }
 
+        private async Task LoadEntryJsonAsync(AppItem app)
+        {
+            if (app == null || string.IsNullOrEmpty(app.EntryJsonUrl))
+            {
+                System.Diagnostics.Debug.WriteLine($"LoadEntryJsonAsync: app={app}, EntryJsonUrl={app?.EntryJsonUrl}");
+                return;
+            }
+
+            System.Diagnostics.Debug.WriteLine($"LoadEntryJsonAsync: Loading from {app.EntryJsonUrl}");
+
+            try
+            {
+                using (var httpClient = new HttpClient())
+                {
+                    var response = await httpClient.GetAsync(new Uri(app.EntryJsonUrl));
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"LoadEntryJsonAsync: HTTP Error {response.StatusCode}");
+                        return;
+                    }
+
+                    var jsonText = await response.Content.ReadAsStringAsync();
+                    var root = JsonObject.Parse(jsonText);
+
+                    var title = GetJsonString(root, "title");
+                    if (!string.IsNullOrEmpty(title))
+                        app.Name = title;
+
+                    var description = GetJsonString(root, "description");
+                    if (!string.IsNullOrEmpty(description))
+                        app.Description = description;
+
+                    var summary = GetJsonString(root, "summary");
+                    if (!string.IsNullOrEmpty(summary))
+                        app.Summary = summary;
+
+                    var creator = GetJsonString(root, "creator");
+                    if (!string.IsNullOrEmpty(creator))
+                        app.Publisher = creator;
+
+                    var appUrlValue = GetJsonString(root, "app_url");
+                    if (!string.IsNullOrEmpty(appUrlValue))
+                    {
+                        app.AppUrl = appUrlValue;
+                        System.Diagnostics.Debug.WriteLine($"LoadEntryJsonAsync: AppUrl set to {app.AppUrl}");
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"LoadEntryJsonAsync: app_url not found in entry.json");
+                    }
+
+                    var appTypeValue = GetJsonString(root, "app_type");
+                    if (!string.IsNullOrEmpty(appTypeValue))
+                    {
+                        app.AppType = appTypeValue;
+                    }
+
+                    var iconValue = GetJsonString(root, "icon");
+                    if (!string.IsNullOrEmpty(iconValue))
+                    {
+                        app.Icon = CombineUrls(app.AppUrl, iconValue);
+                        System.Diagnostics.Debug.WriteLine($"LoadEntryJsonAsync: Icon set to {app.Icon}");
+                    }
+
+                    var downloadUrl = GetJsonString(root, "download_url");
+                    if (!string.IsNullOrEmpty(downloadUrl))
+                        app.DownloadUrl = CombineUrls(app.AppUrl ?? app.BaseUrl, downloadUrl);
+
+                    if (root.ContainsKey("capabilities") && root["capabilities"].ValueType == JsonValueType.Array)
+                    {
+                        app.Capabilities.Clear();
+                        var capsArray = root.GetNamedArray("capabilities");
+                        for (int i = 0; i < (int)capsArray.Count; i++)
+                        {
+                            if (capsArray[i].ValueType == JsonValueType.String)
+                            {
+                                app.Capabilities.Add(capsArray[i].GetString());
+                            }
+                        }
+                    }
+
+                    var certificateUrl = GetJsonString(root, "cer_url");
+                    if (!string.IsNullOrEmpty(certificateUrl))
+                        app.CertificateUrl = CombineUrls(app.BaseUrl, certificateUrl);
+
+                    if (root.ContainsKey("screenshots") && root["screenshots"].ValueType == JsonValueType.Array)
+                    {
+                        app.Screenshots.Clear();
+                        var screenshotsArray = root.GetNamedArray("screenshots");
+                        for (int i = 0; i < (int)screenshotsArray.Count; i++)
+                        {
+                            try
+                            {
+                                if (screenshotsArray[i].ValueType == JsonValueType.String)
+                                {
+                                    var screenshotPath = screenshotsArray[i].GetString();
+                                    var fullUrl = CombineUrls(app.AppUrl ?? app.BaseUrl, screenshotPath);
+                                    app.Screenshots.Add(fullUrl);
+                                }
+                            }
+                            catch { }
+                        }
+                    }
+
+                    if (root.ContainsKey("versions") && root["versions"].ValueType == JsonValueType.Array)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"LoadEntryJsonAsync: Found versions array");
+                        app.Versions.Clear();
+                        var versionsArray = root.GetNamedArray("versions");
+                        System.Diagnostics.Debug.WriteLine($"LoadEntryJsonAsync: Version count = {versionsArray.Count}");
+                        for (int i = 0; i < (int)versionsArray.Count; i++)
+                        {
+                            try
+                            {
+                                var versionObj = versionsArray[i].GetObject();
+                                var versionText = GetJsonString(versionObj, "version");
+                                var versionDownloadUrl = GetJsonString(versionObj, "download_url");
+                                var appFile = GetJsonString(versionObj, "app_file");
+                                
+                                System.Diagnostics.Debug.WriteLine($"LoadEntryJsonAsync: Version={versionText}, appFile={appFile}, downloadUrl={versionDownloadUrl}");
+                                
+                                if (string.IsNullOrEmpty(versionDownloadUrl) && !string.IsNullOrEmpty(appFile))
+                                {
+                                    versionDownloadUrl = CombineUrls(app.AppUrl ?? app.BaseUrl, appFile);
+                                    System.Diagnostics.Debug.WriteLine($"LoadEntryJsonAsync: Generated downloadUrl={versionDownloadUrl}");
+                                }
+                                if (!string.IsNullOrEmpty(versionText) && !string.IsNullOrEmpty(versionDownloadUrl))
+                                {
+                                    app.Versions.Add(new AppVersionInfo
+                                    {
+                                        Version = versionText,
+                                        DownloadUrl = versionDownloadUrl
+                                    });
+                                    System.Diagnostics.Debug.WriteLine($"LoadEntryJsonAsync: Added version {versionText}");
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"LoadEntryJsonAsync: Error parsing version: {ex.Message}");
+                            }
+                        }
+
+                        System.Diagnostics.Debug.WriteLine($"LoadEntryJsonAsync: Total versions loaded = {app.Versions.Count}");
+                        if (app.Versions.Count > 0)
+                        {
+                            app.Versions = app.Versions
+                                .OrderByDescending(v => v.Version, Comparer<string>.Create(CompareVersionStrings))
+                                .ToList();
+
+                            var firstVersion = app.Versions[0];
+                            app.Version = firstVersion.Version;
+                            app.DownloadUrl = firstVersion.DownloadUrl;
+                            System.Diagnostics.Debug.WriteLine($"LoadEntryJsonAsync: Set app.DownloadUrl = {app.DownloadUrl}");
+                        }
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"LoadEntryJsonAsync: No versions array found in entry.json");
+                    }
+                }
+                
+                UpdateVersionDisplay();
+                UpdateCertificateAndMinVersionDisplay();
+                UpdateAppTypeDisplay();
+                if (!string.IsNullOrEmpty(app.Description))
+                {
+                    UpdateDescriptionText(app.Description);
+                }
+                
+                if (app.Screenshots != null && app.Screenshots.Count > 0)
+                {
+                    ScreenshotsScrollViewer.Visibility = Visibility.Visible;
+                    ScreenshotsListView.ItemsSource = app.Screenshots;
+                }
+            }
+            catch { }
+        }
+
+        private string GetJsonString(JsonObject obj, string key)
+        {
+            if (obj.ContainsKey(key))
+            {
+                var value = obj.GetNamedValue(key);
+                if (value.ValueType == JsonValueType.String)
+                {
+                    return value.GetString();
+                }
+            }
+            return string.Empty;
+        }
+
+        private string CombineUrls(string baseUrl, string relativePath)
+        {
+            if (!string.IsNullOrEmpty(relativePath) &&
+                (relativePath.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                 relativePath.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ||
+                 relativePath.StartsWith("//")))
+            {
+                return relativePath;
+            }
+
+            if (string.IsNullOrEmpty(relativePath))
+                return baseUrl;
+
+            if (string.IsNullOrEmpty(baseUrl))
+                return relativePath;
+
+            if (!baseUrl.EndsWith("/"))
+                baseUrl += "/";
+
+            if (relativePath.StartsWith("/"))
+                relativePath = relativePath.Substring(1);
+
+            return baseUrl + relativePath;
+        }
+
         private void UpdateCertificateAndMinVersionDisplay()
         {
             /* if (!string.IsNullOrEmpty(_currentApp.CertificateUrl))
@@ -105,7 +333,7 @@ namespace MEmarket_UWP
             else
             {
                 DownloadCerButton.Visibility = Visibility.Collapsed;
-            } */
+            } 
 
             if (!string.IsNullOrEmpty(_currentApp.MinVersion))
             {
@@ -115,50 +343,44 @@ namespace MEmarket_UWP
             else
             {
                 MinVersionText.Visibility = Visibility.Collapsed;
+            } */
+
+            if (_currentApp.Capabilities != null && _currentApp.Capabilities.Count > 0)
+            {
+                CapabilitiesText.Visibility = Visibility.Visible;
+                CapabilitiesList.Visibility = Visibility.Visible;
+                CapabilitiesList.ItemsSource = _currentApp.Capabilities;
+            }
+            else
+            {
+                CapabilitiesText.Visibility = Visibility.Collapsed;
+                CapabilitiesList.Visibility = Visibility.Collapsed;
             }
         }
 
-        private void UpdateTargetOsDisplay()
+        private void UpdateAppTypeDisplay()
         {
-            TargetOsPanel.Children.Clear();
-
-            if (_currentApp == null || string.IsNullOrEmpty(_currentApp.OS))
+            if (_currentApp == null || string.IsNullOrEmpty(_currentApp.AppType))
             {
-                TargetOsTextBlock.Visibility = Visibility.Collapsed;
-                TargetOsPanel.Visibility = Visibility.Collapsed;
+                AppTypeText.Visibility = Visibility.Collapsed;
                 return;
             }
 
-            TargetOsTextBlock.Visibility = Visibility.Visible;
-            TargetOsPanel.Visibility = Visibility.Visible;
-
-            var osValue = _currentApp.OS.Trim().ToLowerInvariant();
-
-            if (osValue.Contains("wp8.1"))
-            {
-                AddOsImage("Assets/images/wp8.1.png");
-            }
-
-            if (osValue.Contains("w10m"))
-            {
-                AddOsImage("Assets/images/w10m.png");
-            }
+            AppTypeText.Visibility = Visibility.Visible;
+            AppTypeText.Text = $"Тип приложения: {_currentApp.AppType}";
         }
 
-        private void AddOsImage(string imagePath)
+        private void ToggleDescriptionButton_Click(object sender, RoutedEventArgs e)
         {
-            TargetOsPanel.Children.Add(new Image
-            {
-                Source = new BitmapImage(new Uri("ms-appx:///" + imagePath)),
-                Height = 50,
-                HorizontalAlignment = HorizontalAlignment.Left,
-                VerticalAlignment = VerticalAlignment.Top,
-                Margin = new Thickness(0, 0, 8, 0)
-            });
+            _isDescriptionExpanded = !_isDescriptionExpanded;
+            ToggleDescriptionButton.Content = _isDescriptionExpanded ? "Свернуть" : "Развернуть";
+            DescriptionText.MaxLines = _isDescriptionExpanded ? int.MaxValue : 5;
         }
 
         private async void Download_Click(object sender, RoutedEventArgs e)
         {
+            System.Diagnostics.Debug.WriteLine($"Download_Click: _currentApp={_currentApp}, _selectedVersion={_selectedVersion}");
+            
             if (_currentApp == null)
             {
                 await ShowDialogAsync("(｡╯︵╰｡) ", "Ссылка на скачивание недоступна");
@@ -166,8 +388,11 @@ namespace MEmarket_UWP
             }
 
             var downloadUrl = _selectedVersion?.DownloadUrl ?? _currentApp.DownloadUrl;
+            System.Diagnostics.Debug.WriteLine($"Download_Click: downloadUrl={downloadUrl}");
+            
             if (string.IsNullOrEmpty(downloadUrl))
             {
+                System.Diagnostics.Debug.WriteLine($"Download_Click: DownloadUrl is empty. _selectedVersion?.DownloadUrl={_selectedVersion?.DownloadUrl}, _currentApp.DownloadUrl={_currentApp.DownloadUrl}");
                 await ShowDialogAsync("(｡╯︵╰｡) ", "Ссылка на скачивание недоступна");
                 return;
             }
@@ -259,7 +484,21 @@ namespace MEmarket_UWP
                 var extension = Path.GetExtension(fileName).ToLowerInvariant();
                 if (extension == ".xap")
                 {
-                    await ShowDialogAsync("Не так быстро ;)", "Файл XAP не поддерживает развертывание на W10M.");
+                    var dialog = new ContentDialog
+                    {
+                        Title = "Не так быстро ;)",
+                        Content = "Файл XAP не поддерживает развертывание на W10M.",
+                        PrimaryButtonText = "Сохранить файл",
+                        CloseButtonText = "ОК",
+                        DefaultButton = ContentDialogButton.Close
+                    };
+
+                    var result = await dialog.ShowAsync();
+                    if (result == ContentDialogResult.Primary)
+                    {
+                        await SaveXapFileAsync(uri, fileName);
+                    }
+
                     await HideSystemStatusAsync();
                     return;
                 }
@@ -378,6 +617,51 @@ namespace MEmarket_UWP
             return Task.CompletedTask;
         }
 
+        private async Task SaveXapFileAsync(Uri uri, string fileName)
+        {
+            try
+            {
+                var folderPicker = new FolderPicker
+                {
+                    SuggestedStartLocation = PickerLocationId.Downloads
+                };
+                folderPicker.FileTypeFilter.Add("*");
+
+                var folder = await folderPicker.PickSingleFolderAsync();
+                if (folder == null)
+                {
+                    return;
+                }
+
+                await UpdateSystemStatusAsync("Сохранение файла");
+                _downloadAnimationTimer.Start();
+
+                var file = await folder.CreateFileAsync(fileName, CreationCollisionOption.ReplaceExisting);
+
+                using (var httpClient = new HttpClient())
+                {
+                    var response = await httpClient.GetAsync(uri);
+                    response.EnsureSuccessStatusCode();
+
+                    using (var httpResponse = response)
+                    {
+                        await SaveHttpContentToFileAsync(httpResponse, file);
+                    }
+                }
+
+                await ShowDialogAsync("Готово", $"Файл сохранен в папку: {folder.Path}");
+            }
+            catch (Exception ex)
+            {
+                await ShowDialogAsync("Ошибка", $"Не удалось сохранить файл: {ex.Message}");
+            }
+            finally
+            {
+                _downloadAnimationTimer.Stop();
+                await HideSystemStatusAsync();
+            }
+        }
+
         private void UpdateVersionDisplay()
         {
             if (_currentApp.Versions != null && _currentApp.Versions.Count > 1)
@@ -445,6 +729,55 @@ namespace MEmarket_UWP
 
             await dialog.ShowAsync();
         }
+
+        private void UpdateDescriptionText(string description)
+        {
+            if (string.IsNullOrEmpty(description))
+                return;
+
+            DescriptionText.MaxLines = _isDescriptionExpanded ? int.MaxValue : 5;
+            
+            MarkdownRenderer.Render(DescriptionText, description);
+
+            if (HasLongDescription(description))
+            {
+                ToggleDescriptionButton.Visibility = Visibility.Visible;
+                ToggleDescriptionButton.Content = _isDescriptionExpanded ? "Свернуть" : "Развернуть";
+            }
+            else
+            {
+                ToggleDescriptionButton.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private bool HasLongDescription(string description)
+        {
+            if (string.IsNullOrEmpty(description))
+                return false;
+
+            var lines = description.Split(new[] { '\n' }, StringSplitOptions.None);
+            if (lines.Length > 5)
+                return true;
+
+            var estimatedLines = 0;
+            foreach (var line in lines)
+            {
+                var trimmed = line.Trim();
+                if (trimmed.Length == 0)
+                {
+                    estimatedLines++;
+                    continue;
+                }
+
+                estimatedLines += Math.Max(1, (trimmed.Length + 79) / 80);
+                if (estimatedLines > 5)
+                    return true;
+            }
+
+            return false;
+        }
+
+
 
         private void VersionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {

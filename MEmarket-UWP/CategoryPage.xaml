@@ -41,6 +41,7 @@
                         <StackPanel Grid.Column="1">
                             <TextBlock Text="{Binding Name}" FontSize="18" VerticalAlignment="Center" 
                                        />
+                            <TextBlock Text="{Binding Summary}" Style="{ThemeResource BodyTextBlockStyle}" TextWrapping="Wrap" Opacity="0.8" MaxLines="2" TextTrimming="CharacterEllipsis" />
                         </StackPanel>
                     </Grid>
                 </DataTemplate>

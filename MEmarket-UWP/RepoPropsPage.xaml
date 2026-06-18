@@ -15,16 +15,18 @@
         </Grid.RowDefinitions>
 
         <!--TODO: сделать шапку менее колхозней-->
-        <StackPanel Orientation="Horizontal" Background="{ThemeResource SystemControlBackgroundChromeMediumLowBrush}">
+        <RelativePanel Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}">
             <Button x:Name="BackButton" 
                             FontFamily="Segoe MDL2 Assets" 
                             Content="&#xE115;" 
                             FontSize="20" 
                             Width="48" Height="48" 
                             Background="Transparent" 
-                            Click="BackButton_Click"/>
-            <TextBlock x:Name="RepositoryTitleTextBlock" Text="НАЗВАНИЕ РЕПОЗИТОРИЯ" VerticalAlignment="Center" Margin="0,0,0,0" FontSize="18" FontWeight="SemiBold"/>
-        </StackPanel>
+                            Click="BackButton_Click"
+                            RelativePanel.AlignLeftWithPanel="True"
+                            RelativePanel.AlignVerticalCenterWithPanel="True"/>
+            <TextBlock x:Name="RepositoryTitleTextBlock" Text="Название репозитория" VerticalAlignment="Center" Margin="12,0,0,0" FontSize="18" FontWeight="SemiBold" RelativePanel.RightOf="BackButton" RelativePanel.AlignVerticalCenterWithPanel="True" />
+        </RelativePanel>
 
         <ScrollViewer Grid.Row="1" Margin="12,0,12,0" FontFamily="Segoe UI">
             <StackPanel>

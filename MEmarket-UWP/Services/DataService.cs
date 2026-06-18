@@ -16,7 +16,8 @@ namespace MEmarket_UWP.Services
         private static DataService _instance;
         private static readonly object _lock = new object();
 
-        private const string DEFAULT_REPO_URL = "http://millenniummarket.ru/properties.json";
+        private const string DEFAULT_REPO_URL = "http://millenniummarket.ru";
+        private const string INDEX_FILE_NAME = "index.json";
 
         private static readonly Dictionary<string, string> _categoryOrder = new Dictionary<string, string>
         {
@@ -91,17 +92,44 @@ namespace MEmarket_UWP.Services
             _categoriesCache = new Dictionary<string, List<CategoryData>>();
         }
 
-        /// <summary>
-        /// Отображение вп8.1 приложений
-        /// </summary>
-        public static bool ShouldShowWP81Apps()
+        private bool ShouldShowApp(AppItem app)
+        {
+            if (app == null)
+                return false;
+
+            return ShouldShowAppType(app.AppType);
+        }
+
+        private bool ShouldShowAppType(string appType)
         {
             var localSettings = ApplicationData.Current.LocalSettings;
-            if (localSettings.Values.TryGetValue("ShowWP81Apps", out object value) && value is bool show)
+            var showSilverlight = GetBoolSetting(localSettings, "ShowAppTypeSilverlight", true);
+            var showWinRT = GetBoolSetting(localSettings, "ShowAppTypeWinRT", true);
+            var showUwp = GetBoolSetting(localSettings, "ShowAppTypeUWP", true);
+
+            if (string.IsNullOrWhiteSpace(appType))
             {
-                return show;
+                return showSilverlight && showWinRT && showUwp;
             }
-            return false;
+
+            var normalized = appType.Trim().ToLowerInvariant();
+            if (normalized.Contains("silverlight"))
+                return showSilverlight;
+            if (normalized.Contains("winrt"))
+                return showWinRT;
+            if (normalized.Contains("uwp"))
+                return showUwp;
+
+            return showSilverlight && showWinRT && showUwp;
+        }
+
+        private bool GetBoolSetting(ApplicationDataContainer localSettings, string key, bool defaultValue)
+        {
+            if (localSettings.Values.TryGetValue(key, out object value) && value is bool boolValue)
+            {
+                return boolValue;
+            }
+            return defaultValue;
         }
 
         /// <summary>
@@ -138,14 +166,18 @@ namespace MEmarket_UWP.Services
         /// </summary>
         public async Task AddRepositoryAsync(string url)
         {
-            if (_repositories.Any(r => r.Url == url))
+            var normalizedUrl = NormalizeRepositoryRootUrl(url);
+
+            if (_repositories.Any(r => r.Url == normalizedUrl))
                 throw new Exception("Репозиторий уже добавлен");
+
+            var indexUrl = GetIndexUrl(normalizedUrl);
 
             using (var httpClient = new HttpClient())
             {
                 try
                 {
-                    var response = await httpClient.GetAsync(new Uri(url));
+                    var response = await httpClient.GetAsync(new Uri(indexUrl));
                     response.EnsureSuccessStatusCode();
                     var jsonString = await response.Content.ReadAsStringAsync();
                     var jsonObject = JsonObject.Parse(jsonString);
@@ -166,18 +198,18 @@ namespace MEmarket_UWP.Services
 
                     var repo = new Repository
                     {
-                        Url = url,
+                        Url = normalizedUrl,
                         Name = repoName,
                         Creator = creator,
                         LastUpdated = lastUpdated
                     };
 
                     _repositories.Add(repo);
-                    
-                    if (_appsCache.ContainsKey(url))
-                        _appsCache.Remove(url);
-                    if (_categoriesCache.ContainsKey(url))
-                        _categoriesCache.Remove(url);
+
+                    if (_appsCache.ContainsKey(normalizedUrl))
+                        _appsCache.Remove(normalizedUrl);
+                    if (_categoriesCache.ContainsKey(normalizedUrl))
+                        _categoriesCache.Remove(normalizedUrl);
 
                     await SaveRepositoriesAsync();
                 }
@@ -310,17 +342,16 @@ namespace MEmarket_UWP.Services
         public async Task<List<AppItem>> GetAppsByCategoryAsync(string categoryKey)
         {
             var result = new List<AppItem>();
-            var showWP81 = ShouldShowWP81Apps();
 
             foreach (var repo in _repositories)
             {
                 var apps = await GetAppsFromRepositoryAsync(repo.Url);
-                result.AddRange(apps.Where(a => 
+                result.AddRange(apps.Where(a =>
                 {
-                    if (!showWP81 && a.OS != "W10M")
+                    var appCategoryKey = a.Category?.ToLower() ?? string.Empty;
+                    if (!ShouldShowApp(a))
                         return false;
 
-                    var appCategoryKey = a.Category.ToLower();
                     if (categoryKey == OTHER_CATEGORY_KEY)
                     {
                         return !_categoryOrder.ContainsKey(appCategoryKey);
@@ -339,19 +370,20 @@ namespace MEmarket_UWP.Services
         {
             var result = new List<AppItem>();
             var lowerQuery = query.ToLower();
-            var showWP81 = ShouldShowWP81Apps();
 
             foreach (var repo in _repositories)
             {
                 var apps = await GetAppsFromRepositoryAsync(repo.Url);
                 result.AddRange(apps.Where(a =>
                 {
-                    if (!showWP81 && a.OS != "W10M")
+                    if (!ShouldShowApp(a))
                         return false;
 
                     return a.Name.ToLower().Contains(lowerQuery) ||
+                           a.Summary.ToLower().Contains(lowerQuery) ||
                            a.Description.ToLower().Contains(lowerQuery) ||
-                           a.Publisher.ToLower().Contains(lowerQuery);
+                           a.Publisher.ToLower().Contains(lowerQuery) ||
+                           (a.AppType?.ToLower().Contains(lowerQuery) ?? false);
                 }));
             }
 
@@ -364,20 +396,17 @@ namespace MEmarket_UWP.Services
                 return _appsCache[repoUrl];
 
             var apps = new List<AppItem>();
+            var indexUrl = GetIndexUrl(repoUrl);
 
             try
             {
                 using (var httpClient = new HttpClient())
                 {
-                    var response = await httpClient.GetAsync(new Uri(repoUrl));
+                    var response = await httpClient.GetAsync(new Uri(indexUrl));
                     if (response.IsSuccessStatusCode)
                     {
                         var jsonText = await response.Content.ReadAsStringAsync();
                         var jsonObj = JsonObject.Parse(jsonText);
-
-                        var repoName = GetJsonString(jsonObj, "repo_name");
-                        var creator = GetJsonString(jsonObj, "creator");
-                        var lastUpdated = GetJsonString(jsonObj, "last_updated");
 
                         if (jsonObj.ContainsKey("apps"))
                         {
@@ -388,7 +417,27 @@ namespace MEmarket_UWP.Services
                                 {
                                     var appObj = jsonValue.GetObject();
                                     var app = ParseAppItem(appObj, repoUrl);
-                                    apps.Add(app);
+                                    if (ShouldShowApp(app))
+                                    {
+                                        apps.Add(app);
+                                    }
+                                }
+                                catch { /*игнор*/ }
+                            }
+                        }
+                        else if (jsonObj.ContainsKey("packages"))
+                        {
+                            var packagesObj = jsonObj.GetNamedObject("packages");
+                            foreach (var packageId in packagesObj.Keys)
+                            {
+                                try
+                                {
+                                    var packageObj = packagesObj.GetNamedObject(packageId);
+                                    var app = ParseAppItem(packageObj, repoUrl, packageId);
+                                    if (ShouldShowApp(app))
+                                    {
+                                        apps.Add(app);
+                                    }
                                 }
                                 catch { /*игнор*/ }
                             }
@@ -406,49 +455,89 @@ namespace MEmarket_UWP.Services
             return apps;
         }
 
-        private AppItem ParseAppItem(JsonObject jsonObj, string baseRepoUrl)
+        private AppItem ParseAppItem(JsonObject jsonObj, string baseRepoUrl, string explicitId = null)
         {
-            var baseUrl = GetJsonString(jsonObj, "base_url");
-            if (string.IsNullOrEmpty(baseUrl))
+            var appUrl = GetJsonString(jsonObj, "app_url");
+            if (string.IsNullOrEmpty(appUrl))
             {
-                baseUrl = baseRepoUrl.Substring(0, baseRepoUrl.LastIndexOf('/') + 1);
+                appUrl = GetJsonString(jsonObj, "base_url");
+            }
+
+            var appUrlRoot = appUrl;
+            if (!string.IsNullOrEmpty(appUrlRoot) && appUrlRoot.EndsWith("entry.json", StringComparison.OrdinalIgnoreCase))
+            {
+                appUrlRoot = appUrlRoot.Substring(0, appUrlRoot.Length - "entry.json".Length).TrimEnd('/');
+            }
+
+            var entryUrl = appUrl;
+            if (!string.IsNullOrEmpty(entryUrl) && !entryUrl.EndsWith("entry.json", StringComparison.OrdinalIgnoreCase))
+            {
+                entryUrl = entryUrl.TrimEnd('/') + "/entry.json";
+            }
+
+            System.Diagnostics.Debug.WriteLine($"ParseAppItem: appUrl={appUrl}, appUrlRoot={appUrlRoot}, entryUrl={entryUrl}");
+
+            var iconValue = GetJsonString(jsonObj, "icon");
+            var iconUrl = string.Empty;
+
+            if (!string.IsNullOrEmpty(iconValue))
+            {
+                iconUrl = CombineUrls(appUrl, iconValue);
+            }
+
+            var downloadUrl = GetJsonString(jsonObj, "download_url");
+            var certificateUrl = GetJsonString(jsonObj, "cer_url");
+
+            var summary = GetJsonString(jsonObj, "summary");
+            if (string.IsNullOrEmpty(summary))
+            {
+                summary = GetJsonString(jsonObj, "description");
+            }
+
+            var appId = explicitId ?? GetJsonString(jsonObj, "id");
+            if (string.IsNullOrEmpty(appId))
+            {
+                appId = GetJsonString(jsonObj, "title");
             }
 
             var app = new AppItem
             {
-                Id = GetJsonString(jsonObj, "id"),
-                Name = GetJsonString(jsonObj, "title"),
+                Id = appId,
+                Name = string.IsNullOrEmpty(GetJsonString(jsonObj, "title")) ? GetJsonString(jsonObj, "name") : GetJsonString(jsonObj, "title"),
+                Summary = summary,
                 Description = GetJsonString(jsonObj, "description"),
-                Publisher = GetJsonString(jsonObj, "author"),
+                Publisher = string.IsNullOrEmpty(GetJsonString(jsonObj, "author")) ? GetJsonString(jsonObj, "creator") : GetJsonString(jsonObj, "author"),
                 Size = GetJsonString(jsonObj, "size"),
                 Version = GetJsonString(jsonObj, "version"),
                 Category = GetJsonString(jsonObj, "category"),
-                BaseUrl = baseUrl,
+                BaseUrl = baseRepoUrl,
+                AppUrl = appUrlRoot,
+                EntryJsonUrl = !string.IsNullOrEmpty(entryUrl) ? CombineUrls(baseRepoUrl, entryUrl) : string.Empty,
                 OS = GetJsonString(jsonObj, "os"),
+                AppType = GetJsonString(jsonObj, "app_type"),
                 Versions = new List<AppVersionInfo>(),
-                Screenshots = ParseScreenshots(jsonObj, baseUrl)
+                Screenshots = ParseScreenshots(jsonObj, baseRepoUrl)
             };
-            
-            var iconUrl = GetJsonString(jsonObj, "icon_url");
+
+            System.Diagnostics.Debug.WriteLine($"ParseAppItem: Final EntryJsonUrl={app.EntryJsonUrl}");
+
             if (!string.IsNullOrEmpty(iconUrl))
             {
-                app.Icon = CombineUrls(baseUrl, iconUrl);
-            }
-            
-            var downloadUrl = GetJsonString(jsonObj, "download_url");
-            if (!string.IsNullOrEmpty(downloadUrl))
-            {
-                app.DownloadUrl = CombineUrls(baseUrl, downloadUrl);
+                app.Icon = CombineUrls(baseRepoUrl, iconUrl);
             }
 
-            var certificateUrl = GetJsonString(jsonObj, "cer_url");
+            if (!string.IsNullOrEmpty(downloadUrl))
+            {
+                app.DownloadUrl = CombineUrls(baseRepoUrl, downloadUrl);
+            }
+
             if (!string.IsNullOrEmpty(certificateUrl))
             {
-                app.CertificateUrl = CombineUrls(baseUrl, certificateUrl);
+                app.CertificateUrl = CombineUrls(baseRepoUrl, certificateUrl);
             }
 
             app.MinVersion = GetJsonString(jsonObj, "min_ver");
-            
+
             if (jsonObj.ContainsKey("versions"))
             {
                 try
@@ -459,6 +548,12 @@ namespace MEmarket_UWP.Services
                         var versionObj = versionsArray[i].GetObject();
                         var versionText = GetJsonString(versionObj, "version");
                         var versionDownloadUrl = GetJsonString(versionObj, "download_url");
+                        var appFile = GetJsonString(versionObj, "app_file");
+                        if (string.IsNullOrEmpty(versionDownloadUrl) && !string.IsNullOrEmpty(appFile))
+                        {
+                            versionDownloadUrl = CombineUrls(appUrlRoot ?? baseRepoUrl, appFile);
+                        }
+
                         if (!string.IsNullOrEmpty(versionText) && !string.IsNullOrEmpty(versionDownloadUrl))
                         {
                             app.Versions.Add(new AppVersionInfo
@@ -477,7 +572,10 @@ namespace MEmarket_UWP.Services
 
                         var firstVersion = app.Versions[0];
                         app.Version = firstVersion.Version;
-                        app.DownloadUrl = firstVersion.DownloadUrl;
+                        if (string.IsNullOrEmpty(app.DownloadUrl))
+                        {
+                            app.DownloadUrl = firstVersion.DownloadUrl;
+                        }
                     }
                 }
                 catch { /*еще игнор*/ }
@@ -666,6 +764,41 @@ namespace MEmarket_UWP.Services
                     return app;
             }
             return null;
+        }
+
+        private string NormalizeRepositoryRootUrl(string url)
+        {
+            if (string.IsNullOrWhiteSpace(url))
+                return url;
+
+            var normalized = url.Trim();
+            if (normalized.EndsWith(INDEX_FILE_NAME, StringComparison.OrdinalIgnoreCase))
+            {
+                normalized = normalized.Substring(0, normalized.Length - INDEX_FILE_NAME.Length);
+            }
+
+            if (normalized.EndsWith("properties.json", StringComparison.OrdinalIgnoreCase))
+            {
+                normalized = normalized.Substring(0, normalized.Length - "properties.json".Length);
+            }
+
+            while (normalized.EndsWith("/"))
+            {
+                normalized = normalized.Substring(0, normalized.Length - 1);
+            }
+
+            return normalized;
+        }
+
+        private string GetIndexUrl(string repoRootUrl)
+        {
+            if (string.IsNullOrEmpty(repoRootUrl))
+                return string.Empty;
+
+            if (repoRootUrl.EndsWith("/"))
+                return repoRootUrl + INDEX_FILE_NAME;
+
+            return repoRootUrl + "/" + INDEX_FILE_NAME;
         }
     }
 }

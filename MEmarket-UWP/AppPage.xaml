@@ -34,7 +34,11 @@
 
                     <ProgressBar x:Name="DownloadProgressBar" Minimum="0" Maximum="100" Value="0" Height="5" Margin="0,0,0,8" Visibility="Collapsed"/>
                     
-                    <TextBlock x:Name="DescriptionText" Text="Описание приложения" TextWrapping="Wrap" Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,16" FontSize="16"/>
+                    <TextBlock x:Name="SummaryText" Text="Описание приложения" TextWrapping="Wrap" Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,16" FontSize="16" FontWeight="Bold"/>
+
+                    <TextBlock Text="Описание" Margin="0,0,0,8"  FontSize="24" FontFamily="Segoe UI Semilight"/>
+                    <RichTextBlock x:Name="DescriptionText" Margin="0,0,0,16"/>
+                    <HyperlinkButton x:Name="ToggleDescriptionButton" Content="Развернуть" HorizontalAlignment="Left" Click="ToggleDescriptionButton_Click" Margin="0,0,0,16" Visibility="Collapsed"/>
 
                     <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Margin="0,0,0,16" Visibility="Collapsed" x:Name="ScreenshotsScrollViewer">
                         <ListView x:Name="ScreenshotsListView" Margin="0,0,0,0">
@@ -51,13 +55,23 @@
                         </ListView>
                     </ScrollViewer>
 
-                    <TextBlock Text="Подробности" Margin="0,0,0,16" Style="{ThemeResource HeaderTextBlockStyle}" FontSize="22" Opacity="0.5"/>
+                    <TextBlock Text="Подробности" Margin="0,0,0,8"  FontSize="24" FontFamily="Segoe UI Semilight"/>
                     
-                    <TextBlock x:Name="TargetOsTextBlock" Text="Целевая платформа:" Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,0" FontSize="16" Visibility="Collapsed"/>
-                    <StackPanel x:Name="TargetOsPanel" Orientation="Horizontal" Margin="0,0,0,8" Visibility="Collapsed"></StackPanel>
-
-                    <TextBlock x:Name="AppSizeText" Text="Размер: " Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,8" FontSize="16"/>
-                    <TextBlock x:Name="MinVersionText" Text="Мин. версия: " Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,16" FontSize="16"/>
+                    <!-- <TextBlock x:Name="AppSizeText" Text="Размер: " Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,8" FontSize="16"/> 
+                    <TextBlock x:Name="MinVersionText" Text="Мин. версия: " Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,8" FontSize="16"/> -->
+                    <TextBlock x:Name="CapabilitiesText" Text="Возможности:" Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,8" FontSize="16" Visibility="Collapsed"/>
+                    <ItemsControl x:Name="CapabilitiesList" Margin="0,0,0,16" Visibility="Collapsed">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                    <TextBlock Text="• " Style="{ThemeResource BodyTextBlockStyle}"/>
+                                    <TextBlock Text="{Binding}" Style="{ThemeResource BodyTextBlockStyle}" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock x:Name="AppTypeText" Text="Тип приложения: " Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,16" FontSize="16" Visibility="Collapsed"/>
+                    
                 </StackPanel>
             </ScrollViewer>
         </Grid>
