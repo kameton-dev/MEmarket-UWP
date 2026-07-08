@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -98,10 +98,24 @@ namespace MEmarket_UWP
         private void OnBackRequested(object sender, BackRequestedEventArgs e)
         {
             Frame rootFrame = Window.Current.Content as Frame;
-            if (rootFrame != null && rootFrame.CanGoBack)
+            if (rootFrame != null)
             {
-                e.Handled = true;
-                rootFrame.GoBack();
+                if (rootFrame.Content is MainPage mainPage)
+                {
+                    var contentFrame = mainPage.ContentFrame;
+                    if (contentFrame != null && contentFrame.CanGoBack)
+                    {
+                        e.Handled = true;
+                        contentFrame.GoBack();
+                        return;
+                    }
+                }
+
+                if (rootFrame.CanGoBack)
+                {
+                    e.Handled = true;
+                    rootFrame.GoBack();
+                }
             }
         }
 

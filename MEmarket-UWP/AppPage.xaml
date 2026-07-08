@@ -15,8 +15,8 @@
                     <StackPanel Grid.Row="0" Margin="0,0,0,16" Orientation="Horizontal">
                         <Image x:Name="AppIcon" Source="ms-appx:///Assets/StoreLogo.png" Width="80" Height="76" Margin="0,0,0,0" HorizontalAlignment="Left" ImageFailed="IconImage_ImageFailed"/>
                         <StackPanel>
-                            <TextBlock x:Name="AppNameText" Text="Название приложения" Style="{ThemeResource TitleTextBlockStyle}" Margin="8,0,0,0" CharacterSpacing="{ThemeResource PivotHeaderItemCharacterSpacing}"/>
-                            <TextBlock x:Name="PublisherText" Text="Издатель" Style="{ThemeResource BodyTextBlockStyle}" FontSize="16" Margin="8,0,0,0"/>
+                            <TextBlock x:Name="AppNameText" Text="" Style="{ThemeResource TitleTextBlockStyle}" Margin="8,0,0,0" CharacterSpacing="{ThemeResource PivotHeaderItemCharacterSpacing}"/>
+                            <TextBlock x:Name="PublisherText" Text="" Style="{ThemeResource BodyTextBlockStyle}" FontSize="16" Margin="8,0,0,0"/>
                         </StackPanel>
                     </StackPanel>
 
@@ -28,13 +28,13 @@
                               Margin="0,0,0,16"
                               Header="Версия:">
                     </ComboBox>
-                    <TextBlock x:Name="AppVersionText" Text="Версия: " Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,16" FontSize="16"/>
+                    <TextBlock x:Name="AppVersionText" Text="" Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,16" FontSize="16"/>
 
                     <Button x:Name="DownloadButton" Content="Скачать" Click="Download_Click" Margin="0,0,0,8" HorizontalAlignment="Left" Width="150"/>
 
                     <ProgressBar x:Name="DownloadProgressBar" Minimum="0" Maximum="100" Value="0" Height="5" Margin="0,0,0,8" Visibility="Collapsed"/>
                     
-                    <TextBlock x:Name="SummaryText" Text="Описание приложения" TextWrapping="Wrap" Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,16" FontSize="16" FontWeight="Bold"/>
+                    <TextBlock x:Name="SummaryText" Text="" TextWrapping="Wrap" Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,16" FontSize="16" FontWeight="Bold"/>
 
                     <TextBlock Text="Описание" Margin="0,0,0,8"  FontSize="24" FontFamily="Segoe UI Semilight"/>
                     <RichTextBlock x:Name="DescriptionText" Margin="0,0,0,16"/>

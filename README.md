@@ -20,6 +20,7 @@
 ## Особенности:
 
 - **Минимальные зависимости** — простая архитектура на C# / UWP.
+- **Отслеживание обновлений** — полноценная функция обновлений пакетов, отслеживание а также их управление.
 - **Репозитории** — поддержка нескольких репозиториев одновременно и их управление.
 - **Кроссплатформенность** — поддержка приложений под Windows Phone 8.1 и Windows 10 Mobile.
 - **Простота** — репозитории хранятся в простом JSON-формате, легко генерируются и обновляются.
@@ -30,7 +31,7 @@
 
 ### Предварительные требования 
 - Visual Studio 2017 (Поддерживает развертывание UWP приложений на W10M).
-- Устройство на Windows 10 Mobile c мин. сборкой 1703.
+- Устройство на Windows 10 Mobile c мин. сборкой 1607.
 
 ### 1. Клонирование репозитория
 ```bash
@@ -45,8 +46,9 @@ git clone https://github.com/kameton-dev/MEmarket-UWP.git
 
 ## Полезные ссылки и референсы
 
-- [**Как создать собственный репозиторий?**](https://github.com/kameton-dev/MEmarket-Basic/blob/main/README.md)
-- [GitHub репозитория MEmarket-Basic.](https://github.com/kameton-dev/MEmarket-Basic/)
+- [**Веб-сайт проекта**](http://millenniummarket.online)
+- [Как быстро и просто создать свой репозиторий](http://millenniummarket.online/docs/index.html#about-memarketrepo)
+- [GitHub репозитория MEmarket-Basic](https://github.com/kameton-dev/MEmarket-Basic/)
 - [Следите за разработкой в Телеграм канале!](https://t.me/SimpSoft)
 - [Ссылка страницы 4pda](https://4pda.to/forum/index.php?showtopic=1121956)
 - [Референс README](https://github.com/monogram-android/monogram/blob/develop/README_RU.md)

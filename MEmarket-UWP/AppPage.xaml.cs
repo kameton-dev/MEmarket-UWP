@@ -132,6 +132,12 @@ namespace MEmarket_UWP
                     var jsonText = await response.Content.ReadAsStringAsync();
                     var root = JsonObject.Parse(jsonText);
 
+                    var idValue = GetJsonString(root, "id");
+                    if (!string.IsNullOrEmpty(idValue))
+                    {
+                        app.Id = idValue; // Сохраняем ID приложения для локальной БД
+                    }
+
                     var title = GetJsonString(root, "title");
                     if (!string.IsNullOrEmpty(title))
                         app.Name = title;
@@ -383,7 +389,7 @@ namespace MEmarket_UWP
             
             if (_currentApp == null)
             {
-                await ShowDialogAsync("(｡╯︵╰｡) ", "Ссылка на скачивание недоступна");
+                await ShowDialogAsync("(◑_◑)", "Ссылка на скачивание недоступна");
                 return;
             }
 
@@ -486,8 +492,8 @@ namespace MEmarket_UWP
                 {
                     var dialog = new ContentDialog
                     {
-                        Title = "Не так быстро ;)",
-                        Content = "Файл XAP не поддерживает развертывание на W10M.",
+                        Title = "(¬‿¬)",
+                        Content = "Файлы XAP не поддерживаются Установщиком Приложений",
                         PrimaryButtonText = "Сохранить файл",
                         CloseButtonText = "ОК",
                         DefaultButton = ContentDialogButton.Close
@@ -537,14 +543,38 @@ namespace MEmarket_UWP
                 var launched = await Launcher.LaunchFileAsync(file, launchOptions);
                 if (!launched)
                 {
-                    await ShowDialogAsync("Ошибка", "Не удалось открыть файл установки.");
+                    await ShowDialogAsync("┐( ˘_˘ )┌", "Не удалось открыть файл установки.");
+                }
+                else
+                {
+                    // Системный установщик успешно запущен! Сохраняем приложение в локальную БД.
+                    try
+                    {
+                        // Определяем версию, которую выбрал пользователь (из выпадающего списка или дефолтную)
+                        string versionToSave = _selectedVersion?.Version ?? _currentApp.Version;
+
+                        await LocalAppsManager.RegisterInstalledAppAsync(
+                            _currentApp.Id,               // Уникальный ID ("2dcfeda8-...")
+                            _currentApp.Name,             // Название ("Avito")
+                            _currentApp.Icon,             // Ссылка на иконку
+                            versionToSave,                // Установленная версия
+                            _currentApp.BaseUrl,          // Корень репозитория (например, http://canary.millenniummarket.ru)
+                            _currentApp.AppUrl            // Персональный AppUrl (.../metadata/avito.cmp/)
+                        );
+
+                        System.Diagnostics.Debug.WriteLine($"Приложение успешно зарегистрировано в локальной БД: {_currentApp.Name} (v{versionToSave})");
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Не удалось сохранить приложение в базу данных: {ex.Message}");
+                    }
                 }
             }
             catch (Exception ex)
             {
                 _downloadAnimationTimer.Stop();
                 await HideSystemStatusAsync();
-                await ShowDialogAsync("Ошибка", $"Не удалось скачать приложение: {ex.Message}");
+                await ShowDialogAsync(">_<", $"Не удалось скачать приложение: {ex.Message}");
                 return;
             }
             finally

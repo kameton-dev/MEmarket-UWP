@@ -28,7 +28,7 @@
                   ItemClick="AppsListView_ItemClick" VerticalAlignment="Stretch">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Grid Margin="0,0,0,12">
+                    <Grid Margin="0,6,0,6">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
@@ -39,8 +39,7 @@
                                Margin="0,0,8,0"
                                ImageFailed="IconImage_ImageFailed"/>
                         <StackPanel Grid.Column="1">
-                            <TextBlock Text="{Binding Name}" FontSize="18" VerticalAlignment="Center" 
-                                       />
+                            <TextBlock Text="{Binding Name}" FontSize="18" VerticalAlignment="Center"/>
                             <TextBlock Text="{Binding Summary}" Style="{ThemeResource BodyTextBlockStyle}" TextWrapping="Wrap" Opacity="0.8" MaxLines="2" TextTrimming="CharacterEllipsis" />
                         </StackPanel>
                     </Grid>

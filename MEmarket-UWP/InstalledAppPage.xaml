@@ -1,0 +1,101 @@
+<Page
+    x:Class="MEmarket_UWP.InstalledAppPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:MEmarket_UWP"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid x:Name="LayoutRoot">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+
+                <!-- Обновления -->
+                <StackPanel x:Name="UpdatesSection" Margin="0,8,0,24">
+                    <RelativePanel Margin="12,0,12,16">
+                        <TextBlock Text="Доступные обновления" FontSize="24" FontFamily="Segoe UI Semilight" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignVerticalCenterWithPanel="True"/>
+                    </RelativePanel>
+                    <Button x:Name="CheckUpdatesButton" Content="Проверить обновления" Click="CheckUpdatesButton_Click" Margin="12,0,0,8"/>
+                    <ListView x:Name="UpdatesListView" 
+                              IsItemClickEnabled="True"
+                              ItemClick="AppsListView_ItemClick"
+                              ScrollViewer.VerticalScrollMode="Disabled" 
+                              ScrollViewer.IsVerticalRailEnabled="False">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,6,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Image Source="{Binding Icon}" Width="50" Height="50" Margin="0,0,8,0"/>
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock Text="{Binding Name}" FontSize="18" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding VersionProgress}" Style="{ThemeResource BodyTextBlockStyle}" TextWrapping="Wrap" Opacity="0.8"/>
+                                    </StackPanel>
+                                    <Button Grid.Column="2" 
+                                            FontFamily="Segoe MDL2 Assets" 
+                                            Content="&#xE118;" 
+                                            FontSize="18"
+                                            Width="40" Height="40"
+                                            Background="Transparent"
+                                            Click="SingleUpdate_Click"
+                                            DataContext="{Binding}" HorizontalAlignment="Right"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </StackPanel>
+
+                <!-- Установленные приложения -->
+                <StackPanel x:Name="InstalledSection">
+                    <TextBlock Text="Установленные пакеты" Margin="12,0,12,16"  FontSize="24" FontFamily="Segoe UI Semilight"/>
+                    <TextBlock x:Name="NoAppsTextBlock" 
+                               Text="Вы еще не устанавливали приложения из MEmarket." 
+                               FontSize="14" 
+                               Opacity="0.6" 
+                               TextWrapping="Wrap" 
+                               Visibility="Collapsed"
+                               Margin="12,12,17,0"/>
+
+                    <ListView x:Name="InstalledListView" 
+                              IsItemClickEnabled="True"
+                              ItemClick="AppsListView_ItemClick"
+                              ScrollViewer.VerticalScrollMode="Disabled"
+                              ScrollViewer.IsVerticalRailEnabled="False">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,6,0,6" Background="Transparent">
+                                    <Grid.ContextFlyout>
+                                        <MenuFlyout>
+                                            <MenuFlyoutItem Text="Посмотреть приложение" Click="ViewAppDetails_Click"/>
+                                            <MenuFlyoutItem Text="Забыть" Click="ForgetApp_Click"/>
+                                        </MenuFlyout>
+                                    </Grid.ContextFlyout>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Image Source="{Binding Icon}" Width="50" Height="50" Margin="0,0,8,0"/>
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock Text="{Binding Name}" FontSize="18" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding InstalledVersionText}" Style="{ThemeResource BodyTextBlockStyle}" TextWrapping="Wrap" Opacity="0.8"/>
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </StackPanel>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <ProgressRing x:Name="LoadingRing" 
+                      IsActive="True" 
+                      HorizontalAlignment="Center" 
+                      VerticalAlignment="Center" Width="50" Height="50"/>
+    </Grid>
+</Page>

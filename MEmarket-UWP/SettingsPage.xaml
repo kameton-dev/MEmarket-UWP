@@ -10,27 +10,7 @@
     
 
     <Grid x:Name="LayoutRoot">
-
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-
-        <!--TODO: сделать шапку менее колхозней-->
-        <RelativePanel Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}">
-            <Button x:Name="BackButton" 
-                            FontFamily="Segoe MDL2 Assets" 
-                            Content="&#xE10F;" 
-                            FontSize="20" 
-                            Width="48" Height="48" 
-                            Background="Transparent" 
-                            Click="BackButton_Click"
-                            RelativePanel.AlignLeftWithPanel="True"
-                            RelativePanel.AlignVerticalCenterWithPanel="True"/>
-            <TextBlock Text="Настройки" VerticalAlignment="Center" Margin="12,0,0,0" FontSize="18" FontWeight="SemiBold" RelativePanel.RightOf="BackButton" RelativePanel.AlignVerticalCenterWithPanel="True" />
-        </RelativePanel>
-
-        <Pivot Grid.Row="1">
+        <Pivot>
             <PivotItem Header="Основные">
                 <StackPanel>
                     <TextBlock Text="Показывать приложения:" Style="{ThemeResource BodyTextBlockStyle}" Margin="0,8,0,8" FontSize="16"/>
@@ -99,7 +79,7 @@
                         </Border>
                         <TextBlock Text="MEmarket UWP" VerticalAlignment="Center" FontSize="20" FontFamily="Segoe UI Semilight"/>
                     </StackPanel>
-                    <TextBlock Text="Версия 0.0.3.0 Public Beta" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                    <TextBlock Text="Версия 0.1.0.0 (Public Beta)" TextWrapping="Wrap" Margin="0,0,0,8"/>
                     <TextBlock Text="MEmarket находится на этапе разработки. Возможны баги, зависания и микрофризы" Foreground="Red" TextWrapping="Wrap" Margin="0,0,0,8"/>
                     <TextBlock Text="© 2026 kameton.dev. Гойда ＼(°O°)／."
                              Style="{ThemeResource BodyTextBlockStyle}"

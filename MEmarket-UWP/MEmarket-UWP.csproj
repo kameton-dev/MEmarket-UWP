@@ -133,6 +133,11 @@
     <Compile Include="AppPage.xaml.cs">
       <DependentUpon>AppPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="InstalledAppPage.xaml.cs">
+      <DependentUpon>InstalledAppPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Models\TrackedApp.cs" />
+    <Compile Include="Models\UpdateChecker.cs" />
     <Compile Include="RepoPropsPage.xaml.cs">
       <DependentUpon>RepoPropsPage.xaml</DependentUpon>
     </Compile>
@@ -150,6 +155,7 @@
       <DependentUpon>SearchPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Services\DataService.cs" />
+    <Compile Include="Services\LocalAppsManager.cs" />
     <Compile Include="Services\MarkdownRenderer.cs" />
     <Compile Include="SettingsPage.xaml.cs">
       <DependentUpon>SettingsPage.xaml</DependentUpon>
@@ -202,6 +208,10 @@
     <Page Include="AppPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="InstalledAppPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="RepoPropsPage.xaml">
       <SubType>Designer</SubType>
