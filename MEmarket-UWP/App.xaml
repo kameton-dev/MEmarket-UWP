@@ -4,4 +4,29 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:MEmarket_UWP">
 
+    <Application.Resources>
+        <ResourceDictionary>
+
+            <!-- ПЕРЕОПРЕДЕЛЕНИЕ СИСТЕМНЫХ КИСТЕЙ ДЛЯ ВСЕХ LISTVIEW -->
+            <SolidColorBrush x:Key="SystemControlHighlightListAccentLowBrush" Color="{ThemeResource SystemAccentColor}" />
+            <SolidColorBrush x:Key="SystemControlHighlightListAccentMediumBrush" Color="{ThemeResource SystemAccentColor}" />
+            <SolidColorBrush x:Key="SystemControlHighlightListAccentHighBrush" Color="{ThemeResource SystemAccentColor}" />
+
+            <SolidColorBrush x:Key="SystemControlHighlightAltBaseHighBrush" Color="White" />
+            <SolidColorBrush x:Key="SystemControlHighlightAltBaseMediumHighBrush" Color="White" />
+
+
+            <!-- Шаблон для боковой панели -->
+            <Style x:Key="NavigationListViewItemStyle" TargetType="ListViewItem">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="TabNavigation" Value="Local" />
+                <Setter Property="IsHoldingEnabled" Value="True" />
+                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="Padding" Value="5,0,0,0" />
+            </Style>
+
+        </ResourceDictionary>
+    </Application.Resources>
+
 </Application>

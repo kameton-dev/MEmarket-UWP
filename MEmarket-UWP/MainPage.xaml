@@ -46,19 +46,45 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <!-- Категории -->
                     <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled">
                         <StackPanel>
+                            <!-- Системные разделы -->
+                            <ListView x:Name="SystemNavigationListView" 
+                                      IsItemClickEnabled="True" 
+                                      ItemClick="SystemNavigationListView_ItemClick"
+                                      ScrollViewer.VerticalScrollMode="Disabled"
+                                      ItemContainerStyle="{StaticResource NavigationListViewItemStyle}">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Height="48">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="40"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{Binding IconGlyph}"
+                                                       FontFamily="Segoe MDL2 Assets"
+                                                       FontSize="20"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="1" 
+                                                       Text="{Binding Name}" 
+                                                       FontSize="16" 
+                                                       VerticalAlignment="Center" 
+                                                       Margin="8,0,0,0"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+
+
+                            <Border Height="1" Background="{ThemeResource SystemControlForegroundBaseMediumLowBrush}" Opacity="0.3" Margin="16,8,16,8"/>
+                            
+                            <!-- Категории -->
                             <ListView x:Name="CategoriesNavigationListView" 
                                       IsItemClickEnabled="True" 
                                       ItemClick="CategoriesNavigationListView_ItemClick"
-                                      ScrollViewer.VerticalScrollMode="Disabled">
-                                <ListView.ItemContainerStyle>
-                                    <Style TargetType="ListViewItem">
-                                        <Setter Property="Padding" Value="5,0,0,0"/>
-                                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                                    </Style>
-                                </ListView.ItemContainerStyle>
+                                      ScrollViewer.VerticalScrollMode="Disabled"
+                                      ItemContainerStyle="{StaticResource NavigationListViewItemStyle}">
                                 <ListView.ItemTemplate>
                                     <DataTemplate>
                                         <Grid Height="48">
@@ -81,52 +107,12 @@
                                     </DataTemplate>
                                 </ListView.ItemTemplate>
                             </ListView>
-
-                            <Border Height="1" Background="{ThemeResource SystemControlForegroundBaseMediumLowBrush}" Opacity="0.3" Margin="5,8"/>
-
-                            <!-- Системные разделы -->
-                            <ListView x:Name="SystemNavigationListView" 
-                                      IsItemClickEnabled="True" 
-                                      ItemClick="SystemNavigationListView_ItemClick"
-                                      ScrollViewer.VerticalScrollMode="Disabled">
-                                <ListView.ItemContainerStyle>
-                                    <Style TargetType="ListViewItem">
-                                        <Setter Property="Padding" Value="5,0,0,0"/>
-                                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                                    </Style>
-                                </ListView.ItemContainerStyle>
-                                <ListView.ItemTemplate>
-                                    <DataTemplate>
-                                        <Grid Height="48">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="40"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Text="{Binding IconGlyph}"
-                                                       FontFamily="Segoe MDL2 Assets"
-                                                       FontSize="20"
-                                                       HorizontalAlignment="Center"
-                                                       VerticalAlignment="Center"/>
-                                            <TextBlock Grid.Column="1" 
-                                                       Text="{Binding Name}" 
-                                                       FontSize="16" 
-                                                       VerticalAlignment="Center" 
-                                                       Margin="8,0,0,0"/>
-                                        </Grid>
-                                    </DataTemplate>
-                                </ListView.ItemTemplate>
-                            </ListView>
                         </StackPanel>
                     </ScrollViewer>
 
                     <!-- Настройки -->
-                    <ListView x:Name="SettingsNavigationListView" Grid.Row="1" IsItemClickEnabled="True" ItemClick="SettingsNavigationListView_ItemClick" ScrollViewer.VerticalScrollMode="Disabled">
-                        <ListView.ItemContainerStyle>
-                            <Style TargetType="ListViewItem">
-                                <Setter Property="Padding" Value="5,0,0,0"/>
-                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                            </Style>
-                        </ListView.ItemContainerStyle>
+                    <ListView x:Name="SettingsNavigationListView" Grid.Row="1" IsItemClickEnabled="True" ItemClick="SettingsNavigationListView_ItemClick" ScrollViewer.VerticalScrollMode="Disabled"
+                              ItemContainerStyle="{StaticResource NavigationListViewItemStyle}">
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <Grid Height="48">

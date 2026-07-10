@@ -12,13 +12,13 @@
 
         <ScrollViewer Margin="12,0,12,0" FontFamily="Segoe UI">
             <StackPanel>
-                <TextBlock Text="URL репозитория:" Style="{ThemeResource HeaderTextBlockStyle}" FontSize="22" Opacity="0.5" FontFamily="Segoe UI" Margin="0,8,0,0"/>
+                <TextBlock Text="URL репозитория" Margin="0,0,0,8"  FontSize="24" FontWeight="SemiLight"/>
                 <TextBlock x:Name="RepositoryUrlTextBlock" Text="" Style="{ThemeResource BodyTextBlockStyle}" TextWrapping="Wrap" Margin="0,0,0,16"/>
 
-                <TextBlock Text="Создатель:" Style="{ThemeResource HeaderTextBlockStyle}" FontSize="22" Opacity="0.5"/>
+                <TextBlock Text="Создатель" Margin="0,0,0,8"  FontSize="24" FontWeight="SemiLight"/>
                 <TextBlock x:Name="CreatorTextBlock" Text="" Style="{ThemeResource BodyTextBlockStyle}" TextWrapping="Wrap" Margin="0,0,0,16"/>
 
-                <TextBlock Text="Последнее обновление:" Style="{ThemeResource HeaderTextBlockStyle}" FontSize="22" Opacity="0.5"/>
+                <TextBlock Text="Последнее обновление" Margin="0,0,0,8"  FontSize="24" FontWeight="SemiLight"/>
                 <TextBlock x:Name="LastUpdatedTextBlock" Text="" Style="{ThemeResource BodyTextBlockStyle}" TextWrapping="Wrap" Margin="0,0,0,16"/>
 
                 <!-- <TextBlock Text="Поддерживаемые платформы:" Style="{ThemeResource HeaderTextBlockStyle}" FontSize="22" Margin="0,0,0,6" Opacity="0.5"/>

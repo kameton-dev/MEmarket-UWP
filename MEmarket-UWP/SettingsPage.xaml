@@ -50,7 +50,7 @@
                              ItemClick="RepositoriesListBox_ItemClick">
                                 <ListView.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid Margin="0,0,0,8">
+                                        <Grid Margin="0,6">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="Auto"/>
@@ -58,7 +58,7 @@
                                             <StackPanel Grid.Column="0">
                                                 <TextBlock Text="{Binding Name}" 
                                                    Style="{ThemeResource BodyTextBlockStyle}"
-                                                   FontWeight="Bold"/>
+                                                   FontWeight="Bold" FontSize="16"/>
                                                 <TextBlock Text="{Binding Creator}" 
                                                    Style="{ThemeResource CaptionTextBlockStyle}"/>
                                             </StackPanel>
@@ -79,7 +79,7 @@
                         </Border>
                         <TextBlock Text="MEmarket UWP" VerticalAlignment="Center" FontSize="20" FontFamily="Segoe UI Semilight"/>
                     </StackPanel>
-                    <TextBlock Text="Версия 0.1.0.0 (Public Beta)" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                    <TextBlock Text="Версия 0.1.1.0 (Public Beta)" TextWrapping="Wrap" Margin="0,0,0,8"/>
                     <TextBlock Text="MEmarket находится на этапе разработки. Возможны баги, зависания и микрофризы" Foreground="Red" TextWrapping="Wrap" Margin="0,0,0,8"/>
                     <TextBlock Text="© 2026 kameton.dev. Гойда ＼(°O°)／."
                              Style="{ThemeResource BodyTextBlockStyle}"

@@ -29,6 +29,7 @@ namespace MEmarket_UWP
             
             SystemNavigationListView.ItemsSource = new List<NavigationItem>
             {
+                new NavigationItem { IconGlyph = "\uE80F", Name = "Главная", TargetPageType = typeof(HomePage) },
                 new NavigationItem { IconGlyph = "\uE11A", Name = "Поиск", TargetPageType = typeof(SearchPage) },
                 new NavigationItem { IconGlyph = "\uE118", Name = "Загрузки и обновления", TargetPageType = typeof(InstalledAppPage) }
             };
@@ -42,31 +43,40 @@ namespace MEmarket_UWP
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
-            
-            ContentFrame.Navigated += ContentFrame_Navigated;
-            
-            SystemNavigationManager.GetForCurrentView().BackRequested += MainPage_BackRequested;
-            
-            UpdateBackButtonVisibility();
 
             _dataService = DataService.GetInstance();
-            
+
             try
             {
                 LoadingRing.IsActive = true;
                 LoadingRing.Visibility = Visibility.Visible;
+                await _dataService.InitializeAsync();
                 var categories = await _dataService.GetCategoriesAsync();
                 CategoriesNavigationListView.ItemsSource = categories;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error loading categories: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Ошибка загрузки категорий: {ex.Message}");
             }
             finally
             {
                 LoadingRing.IsActive = false;
                 LoadingRing.Visibility = Visibility.Collapsed;
             }
+            
+            if (ContentFrame.Content == null)
+            {
+                ContentFrame.Navigate(typeof(HomePage));
+                
+                if (SystemNavigationListView != null)
+                {
+                    SystemNavigationListView.SelectedIndex = 0;
+                }
+            }
+            
+            ContentFrame.Navigated += ContentFrame_Navigated;
+            SystemNavigationManager.GetForCurrentView().BackRequested += MainPage_BackRequested;
+            UpdateBackButtonVisibility();
         }
 
         private void HamburgerButton_Click(object sender, RoutedEventArgs e)
@@ -112,8 +122,21 @@ namespace MEmarket_UWP
 
         private void ContentFrame_Navigated(object sender, NavigationEventArgs e)
         {
+            if (e.SourcePageType == typeof(HomePage) ||
+                e.SourcePageType == typeof(SearchPage) ||
+                e.SourcePageType == typeof(InstalledAppPage) ||
+                e.SourcePageType == typeof(SettingsPage))
+            {
+                ContentFrame.BackStack.Clear();
+            }
+            
             UpdateBackButtonVisibility();
-            if (e.SourcePageType == typeof(CategoryPage))
+            
+            if (e.SourcePageType == typeof(HomePage))
+            {
+                TitleTextBlock.Text = "Главная";
+            }
+            else if (e.SourcePageType == typeof(CategoryPage))
             {
                 if (e.Parameter is CategoryData category)
                 {
@@ -148,9 +171,6 @@ namespace MEmarket_UWP
                 }
             }
         }
-
-        /* --- Эксперимент с кнопкой "назад" для десктопного варианта ---
-         * TODO: решить судьбу этой задумки */
 
         private void UpdateBackButtonVisibility()
         {
