@@ -16,11 +16,13 @@
                     <TextBlock Text="Показывать приложения:" Style="{ThemeResource BodyTextBlockStyle}" Margin="0,8,0,8" FontSize="16"/>
                     <CheckBox x:Name="SilverlightCheckBox" Content="Silverlight [WP8.0-8.1]" HorizontalAlignment="Stretch" Margin="0,0,0,0" VerticalAlignment="Stretch" Checked="AppTypeFilter_Changed" Unchecked="AppTypeFilter_Changed"/>
                     <CheckBox x:Name="WinRTCheckBox" Content="WinRT [WP8.1] (Подходит для W10M)" HorizontalAlignment="Stretch" Margin="0,0,0,0" VerticalAlignment="Stretch" Checked="AppTypeFilter_Changed" Unchecked="AppTypeFilter_Changed"/>
-                    <CheckBox x:Name="UwpCheckBox" Content="UWP [W10M]" HorizontalAlignment="Stretch" Margin="0,0,0,16" VerticalAlignment="Stretch" Checked="AppTypeFilter_Changed" Unchecked="AppTypeFilter_Changed"/>
+                    <CheckBox x:Name="UwpCheckBox" Content="UWP [W10M]" HorizontalAlignment="Stretch" Margin="0,0,0,0.1" VerticalAlignment="Stretch" Checked="AppTypeFilter_Changed" Unchecked="AppTypeFilter_Changed"/>
+
+                    <ToggleSwitch x:Name="BackgroundUpdateToggle" Header="Проверка обновлений в фоне при старте заходе в приложение" HorizontalAlignment="Stretch" Margin="0,8,0,0" VerticalAlignment="Stretch" Toggled="BackgroundUpdateToggle_Toggled"/>
+                    
+                    <Border Height="1" Background="{ThemeResource SystemControlForegroundBaseMediumLowBrush}" Opacity="0.3" Margin="8,16,8,16"/>
 
                     <Button Content="Очистить кэш" HorizontalAlignment="Left" VerticalAlignment="Top" Click="ClearCacheButton_Click"/>
-                    
-
                 </StackPanel>
             </PivotItem>
             
@@ -79,11 +81,9 @@
                         </Border>
                         <TextBlock Text="MEmarket UWP" VerticalAlignment="Center" FontSize="20" FontFamily="Segoe UI Semilight"/>
                     </StackPanel>
-                    <TextBlock Text="Версия 0.1.1.0 (Public Beta)" TextWrapping="Wrap" Margin="0,0,0,8"/>
-                    <TextBlock Text="MEmarket находится на этапе разработки. Возможны баги, зависания и микрофризы" Foreground="Red" TextWrapping="Wrap" Margin="0,0,0,8"/>
-                    <TextBlock Text="© 2026 kameton.dev. Гойда ＼(°O°)／."
-                             Style="{ThemeResource BodyTextBlockStyle}"
-                             Opacity="0.6"/>
+                    <TextBlock Text="Версия 0.1.2.0 (Public Beta)" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                    <TextBlock Text="Данный клиент находится на этапе разработки. Возможны баги, зависания и микрофризы" Foreground="Red" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                    <TextBlock Text="© 2026 kameton.dev. Гойда ＼(°O°)／." Style="{ThemeResource BodyTextBlockStyle}" Opacity="0.6"/>
                 </StackPanel>
             </PivotItem>
         </Pivot>

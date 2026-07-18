@@ -18,21 +18,31 @@
                         <TextBlock Text="Доступные обновления" FontSize="24" FontWeight="SemiLight" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignVerticalCenterWithPanel="True"/>
                     </RelativePanel>
                     <Button x:Name="CheckUpdatesButton" Content="Проверить обновления" Click="CheckUpdatesButton_Click" Margin="12,0,0,8"/>
+
                     <ListView x:Name="UpdatesListView" 
                               IsItemClickEnabled="True"
                               ItemClick="AppsListView_ItemClick"
                               ScrollViewer.VerticalScrollMode="Disabled" 
-                              ScrollViewer.IsVerticalRailEnabled="False">
+                              ScrollViewer.IsVerticalRailEnabled="False"
+                              ContainerContentChanging="UpdatesListView_ContainerContentChanging">
+
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Padding" Value="0"/>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <Grid Margin="0,6,0,6">
+                                <Grid Margin="12,6,16,6">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <Image Source="{Binding Icon}" Width="50" Height="50" Margin="0,0,8,0"/>
-                                    <StackPanel Grid.Column="1">
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                         <TextBlock Text="{Binding Name}" FontSize="18" VerticalAlignment="Center"/>
                                         <TextBlock Text="{Binding VersionProgress}" Style="{ThemeResource BodyTextBlockStyle}" TextWrapping="Wrap" Opacity="0.8"/>
                                     </StackPanel>
@@ -43,7 +53,9 @@
                                             Width="40" Height="40"
                                             Background="Transparent"
                                             Click="SingleUpdate_Click"
-                                            DataContext="{Binding}" HorizontalAlignment="Right"/>
+                                            DataContext="{Binding}" 
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Center"/>
                                 </Grid>
                             </DataTemplate>
                         </ListView.ItemTemplate>
@@ -65,10 +77,17 @@
                               IsItemClickEnabled="True"
                               ItemClick="AppsListView_ItemClick"
                               ScrollViewer.VerticalScrollMode="Disabled"
-                              ScrollViewer.IsVerticalRailEnabled="False">
+                              ScrollViewer.IsVerticalRailEnabled="False"
+                              ContainerContentChanging="InstalledListView_ContainerContentChanging">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Padding" Value="0"/>
+                            </Style>
+                        </ListView.ItemContainerStyle>
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <Grid Margin="0,6,0,6" Background="Transparent">
+                                <Grid Margin="12,6,16,6" Background="Transparent">
                                     <Grid.ContextFlyout>
                                         <MenuFlyout>
                                             <MenuFlyoutItem Text="Посмотреть приложение" Click="ViewAppDetails_Click"/>
@@ -80,7 +99,7 @@
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
                                     <Image Source="{Binding Icon}" Width="50" Height="50" Margin="0,0,8,0"/>
-                                    <StackPanel Grid.Column="1">
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                         <TextBlock Text="{Binding Name}" FontSize="18" VerticalAlignment="Center"/>
                                         <TextBlock Text="{Binding InstalledVersionText}" Style="{ThemeResource BodyTextBlockStyle}" TextWrapping="Wrap" Opacity="0.8"/>
                                     </StackPanel>

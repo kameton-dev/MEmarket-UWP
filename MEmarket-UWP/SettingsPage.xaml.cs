@@ -36,11 +36,36 @@ namespace MEmarket_UWP
             LoadRepositories();
             //LoadAndApplyTheme();
             LoadAppTypeSettings();
+
+            var localSettings = ApplicationData.Current.LocalSettings;
+            bool isEnabled = false;
+            
+            if (localSettings.Values.ContainsKey("BackgroundUpdateCheckEnabled"))
+            {
+                var savedValue = localSettings.Values["BackgroundUpdateCheckEnabled"];
+                if (savedValue is bool)
+                {
+                    isEnabled = (bool)savedValue;
+                }
+            }
+            
+            BackgroundUpdateToggle.Toggled -= BackgroundUpdateToggle_Toggled;
+
+            BackgroundUpdateToggle.IsOn = isEnabled;
+
+            BackgroundUpdateToggle.Toggled += BackgroundUpdateToggle_Toggled;
         }
 
         private void LoadRepositories()
         {
             RepositoriesListBox.ItemsSource = _dataService.Repositories;
+        }
+
+        private void BackgroundUpdateToggle_Toggled(object sender, RoutedEventArgs e)
+        {
+            var localSettings = ApplicationData.Current.LocalSettings;
+            
+            localSettings.Values["BackgroundUpdateCheckEnabled"] = BackgroundUpdateToggle.IsOn;
         }
 
         private async void AddRepositoryButton_Click(object sender, RoutedEventArgs e)
@@ -89,6 +114,7 @@ namespace MEmarket_UWP
             };
             await dialog.ShowAsync();
         }
+
         //TODO: доделать переключение светлой и темной тем
         private void ApplyTheme(string themeTag)
         {
@@ -114,7 +140,6 @@ namespace MEmarket_UWP
 
         private void LoadAppTypeSettings()
         {
-            // Устанавливаем флаг перед тем, как менять значения программно
             _isInitializing = true;
 
             try
@@ -126,14 +151,12 @@ namespace MEmarket_UWP
             }
             finally
             {
-                // Снимаем флаг в блоке finally, чтобы он гарантированно отключился после загрузки
                 _isInitializing = false;
             }
         }
 
         private void AppTypeFilter_Changed(object sender, RoutedEventArgs e)
         {
-            // Если сейчас происходит загрузка настроек, игнорируем срабатывание события
             if (_isInitializing)
                 return;
 

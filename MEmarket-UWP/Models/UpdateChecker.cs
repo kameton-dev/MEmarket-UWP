@@ -11,12 +11,12 @@ namespace MEmarket_UWP.Models
     public static class UpdateChecker
     {
         private static readonly HttpClient HttpClient = new HttpClient();
+        public static List<UpdateableApp> CachedUpdates { get; set; } = new List<UpdateableApp>();
 
         public static async Task<List<UpdateableApp>> CheckForUpdatesAsync(List<TrackedApp> installedApps)
         {
             var updateableApps = new List<UpdateableApp>();
-
-            // Группируем установленные приложения по корневым репозиториям
+            
             var repoGroups = new Dictionary<string, List<TrackedApp>>();
             foreach (var app in installedApps)
             {
@@ -28,8 +28,7 @@ namespace MEmarket_UWP.Models
 
                 repoGroups[repoBaseUrl].Add(app);
             }
-
-            // Опрашиваем index.json каждого уникального репозитория
+            
             foreach (var repo in repoGroups)
             {
                 string repoUrl = repo.Key;
@@ -48,7 +47,6 @@ namespace MEmarket_UWP.Models
 
                             foreach (var localApp in localApps)
                             {
-                                // Ищем приложение в по его ID
                                 if (packages.ContainsKey(localApp.Id))
                                 {
                                     JsonObject remoteApp = packages.GetNamedObject(localApp.Id);

@@ -1,6 +1,7 @@
 using MEmarket_UWP.Models;
 using MEmarket_UWP.Services;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Net.Http;
@@ -32,7 +33,20 @@ namespace MEmarket_UWP
             base.OnNavigatedTo(e);
             
             UpdatesListView.Visibility = Visibility.Collapsed;
-            
+
+            if (UpdateChecker.CachedUpdates != null && UpdateChecker.CachedUpdates.Count > 0)
+            {
+                foreach (var update in UpdateChecker.CachedUpdates)
+                {
+                    AvailableUpdates.Add(update);
+                }
+                UpdatesListView.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                UpdatesListView.Visibility = Visibility.Collapsed;
+            }
+
             await RefreshInstalledListAsync();
         }
         
@@ -59,8 +73,9 @@ namespace MEmarket_UWP
             AvailableUpdates.Clear();
             
             var localApps = await LocalAppsManager.LoadAppsAsync();
-            
             var updates = await UpdateChecker.CheckForUpdatesAsync(localApps);
+
+            UpdateChecker.CachedUpdates = updates ?? new List<UpdateableApp>();
 
             foreach (var update in updates)
             {
@@ -304,6 +319,30 @@ namespace MEmarket_UWP
                 {
                     LoadingRing.IsActive = false;
                 }
+            }
+        }
+        
+        private void UpdatesListView_ContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args)
+        {
+            if (args.ItemIndex % 2 == 1)
+            {
+                args.ItemContainer.Background = new Windows.UI.Xaml.Media.SolidColorBrush(Windows.UI.Color.FromArgb(20, 255, 255, 255));
+            }
+            else
+            {
+                args.ItemContainer.Background = new Windows.UI.Xaml.Media.SolidColorBrush(Windows.UI.Colors.Transparent);
+            }
+        }
+
+        private void InstalledListView_ContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args)
+        {
+            if (args.ItemIndex % 2 == 1)
+            {
+                args.ItemContainer.Background = new Windows.UI.Xaml.Media.SolidColorBrush(Windows.UI.Color.FromArgb(20, 255, 255, 255));
+            }
+            else
+            {
+                args.ItemContainer.Background = new Windows.UI.Xaml.Media.SolidColorBrush(Windows.UI.Colors.Transparent);
             }
         }
     }
