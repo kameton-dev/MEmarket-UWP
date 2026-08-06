@@ -17,8 +17,8 @@ namespace MEmarket_UWP
     {
         public ObservableCollection<CategoryData> Categories { get; set; } = new ObservableCollection<CategoryData>();
         public ObservableCollection<AppItem> NewApps { get; set; } = new ObservableCollection<AppItem>();
-
         private AppItem _featuredApp;
+        private readonly Windows.ApplicationModel.Resources.ResourceLoader loader = Windows.ApplicationModel.Resources.ResourceLoader.GetForCurrentView();
 
         public HomePage()
         {
@@ -34,7 +34,6 @@ namespace MEmarket_UWP
             await LoadHomeDataAsync();
         }
 
-        // Загрузка и структурирование данных
         private async Task LoadHomeDataAsync()
         {
             LoadingRing.IsActive = true;
@@ -67,13 +66,13 @@ namespace MEmarket_UWP
                     }
                     FeaturedBanner.Visibility = Visibility.Visible;
                 }
-                
-                RepoStatusText.Text = $"Подключено репозиториев: {dataService.Repositories.Count}. Последнее обновление: сегодня";
+
+                RepoStatusText.Text = string.Format(loader.GetString("RepoStatusFormat"), dataService.Repositories.Count);
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Ошибка загрузки домашней страницы: {ex.Message}");
-                RepoStatusText.Text = "Ошибка подключения к сети Millennium Market";
+                RepoStatusText.Text = loader.GetString("RepoConnectionError");
             }
             finally
             {

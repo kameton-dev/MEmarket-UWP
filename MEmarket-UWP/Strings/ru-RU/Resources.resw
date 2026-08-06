@@ -1,0 +1,369 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AboutPivotItem.Header" xml:space="preserve">
+    <value>О программе</value>
+  </data>
+  <data name="AddRepositoryButton.Content" xml:space="preserve">
+    <value>Добавить</value>
+  </data>
+  <data name="AvailableUpd.Text" xml:space="preserve">
+    <value>Доступные обновления</value>
+  </data>
+  <data name="BackgroundUpdateToggle.Header" xml:space="preserve">
+    <value>Проверять обновления в фоне</value>
+  </data>
+  <data name="CapabilitiesText.Text" xml:space="preserve">
+    <value>Возможности:</value>
+  </data>
+  <data name="CheckUpdatesButton.Content" xml:space="preserve">
+    <value>Проверить наличие обновлений</value>
+  </data>
+  <data name="ClearCache.Content" xml:space="preserve">
+    <value>Очистить кэш</value>
+  </data>
+  <data name="Creator.Text" xml:space="preserve">
+    <value>Создатель</value>
+  </data>
+  <data name="DescriptionHeader.Text" xml:space="preserve">
+    <value>Описание</value>
+  </data>
+  <data name="DetailsHeader.Text" xml:space="preserve">
+    <value>Подробности</value>
+  </data>
+  <data name="DownloadButton.Content" xml:space="preserve">
+    <value>Установить</value>
+  </data>
+  <data name="DownloadedApps.Text" xml:space="preserve">
+    <value>Установленные пакеты</value>
+  </data>
+  <data name="LastUpd.Text" xml:space="preserve">
+    <value>Последнее обновление</value>
+  </data>
+  <data name="MainPivotItem.Header" xml:space="preserve">
+    <value>Основные</value>
+  </data>
+  <data name="MenuDownloads" xml:space="preserve">
+    <value>Загрузки и обновления</value>
+  </data>
+  <data name="MenuHome" xml:space="preserve">
+    <value>Главная</value>
+  </data>
+  <data name="MenuSearch" xml:space="preserve">
+    <value>Поиск</value>
+  </data>
+  <data name="MenuSettings" xml:space="preserve">
+    <value>Настройки</value>
+  </data>
+  <data name="NoAppsTextBlock.Text" xml:space="preserve">
+    <value>Вы еще не устанавливали приложения из MEmarket.</value>
+  </data>
+  <data name="NoResultsText.Text" xml:space="preserve">
+    <value>Начните вводить запрос</value>
+  </data>
+  <data name="RecomendText.Text" xml:space="preserve">
+    <value>РЕКОМЕНДАЦИЯ</value>
+  </data>
+  <data name="RepoPivotItem.Header" xml:space="preserve">
+    <value>Репозитории</value>
+  </data>
+  <data name="RepositoryUrlTextBox.PlaceholderText" xml:space="preserve">
+    <value>Введите URL репозитория...</value>
+  </data>
+  <data name="RepoUrl.Text" xml:space="preserve">
+    <value>URL репозитория</value>
+  </data>
+  <data name="SearchTextBox.PlaceholderText" xml:space="preserve">
+    <value>Поиск приложений</value>
+  </data>
+  <data name="ShowAppsText.Text" xml:space="preserve">
+    <value>Показывать приложения:</value>
+  </data>
+  <data name="StatusText.Text" xml:space="preserve">
+    <value>Состояние</value>
+  </data>
+  <data name="VersionLabel.Text" xml:space="preserve">
+    <value>Версия</value>
+  </data>
+  <data name="WarningText.Text" xml:space="preserve">
+    <value>Данный клиент находится на этапе разработки. Возможны баги, зависания и микрофризы</value>
+  </data>
+  <data name="AllAppsUpd" xml:space="preserve">
+    <value>Все ваши приложения обновлены до актуальной версии.</value>
+  </data>
+  <data name="CancelButton" xml:space="preserve">
+    <value>Отмена</value>
+  </data>
+  <data name="CloseButton" xml:space="preserve">
+    <value>Закрыть</value>
+  </data>
+  <data name="ContinueButton" xml:space="preserve">
+    <value>Продолжить</value>
+  </data>
+  <data name="DownloadErrorMessage" xml:space="preserve">
+    <value>Не удалось скачать приложение:</value>
+  </data>
+  <data name="DownloadUrlNotAvailable" xml:space="preserve">
+    <value>Ссылка на скачивание недоступна</value>
+  </data>
+  <data name="FileSavedDir" xml:space="preserve">
+    <value>Файл сохранён в папку:</value>
+  </data>
+  <data name="FileSavedDirError" xml:space="preserve">
+    <value>Не удалось сохранить файл.</value>
+  </data>
+  <data name="InstallErrorTitle" xml:space="preserve">
+    <value>Ошибка</value>
+  </data>
+  <data name="LaunchInstallErrorMessage" xml:space="preserve">
+    <value>Не удалось открыть файл установки.</value>
+  </data>
+  <data name="OkButton" xml:space="preserve">
+    <value>ОК</value>
+  </data>
+  <data name="PathRepoManifest" xml:space="preserve">
+    <value />
+  </data>
+  <data name="SaveFileButton" xml:space="preserve">
+    <value>Сохранить файл</value>
+  </data>
+  <data name="StartPackageError" xml:space="preserve">
+    <value>Не удалось запустить файл установки пакета.</value>
+  </data>
+  <data name="XapNotSupportedMessage" xml:space="preserve">
+    <value>Файлы XAP не поддерживаются Установщиком Приложений</value>
+  </data>
+  <data name="AppRestartError" xml:space="preserve">
+    <value>Ошибка перезапуска приложения</value>
+  </data>
+  <data name="AppRestartFailed" xml:space="preserve">
+    <value>Не удалось перезапустить приложение. Пожалуйста, закройте и откройте его вручную.</value>
+  </data>
+  <data name="AppRestartMessage" xml:space="preserve">
+    <value>Для применения выбранного языка требуется перезапустить приложение.</value>
+  </data>
+  <data name="Category_business" xml:space="preserve">
+    <value>Бизнес</value>
+  </data>
+  <data name="Category_education" xml:space="preserve">
+    <value>Обучение</value>
+  </data>
+  <data name="Category_entertaintment" xml:space="preserve">
+    <value>Развлечения</value>
+  </data>
+  <data name="Category_games" xml:space="preserve">
+    <value>Игры</value>
+  </data>
+  <data name="Category_health_fitness" xml:space="preserve">
+    <value>Здоровье + Фитнес</value>
+  </data>
+  <data name="Category_livestyle" xml:space="preserve">
+    <value>Лайвстайл</value>
+  </data>
+  <data name="Category_music_video" xml:space="preserve">
+    <value>Музыка + Видео</value>
+  </data>
+  <data name="Category_news_weather" xml:space="preserve">
+    <value>Новости + Погода</value>
+  </data>
+  <data name="Category_other" xml:space="preserve">
+    <value>Прочее</value>
+  </data>
+  <data name="Category_photo" xml:space="preserve">
+    <value>Фото</value>
+  </data>
+  <data name="Category_social" xml:space="preserve">
+    <value>Социальные сети</value>
+  </data>
+  <data name="Category_sports" xml:space="preserve">
+    <value>Спорт</value>
+  </data>
+  <data name="Category_store" xml:space="preserve">
+    <value>Магазины приложений</value>
+  </data>
+  <data name="Category_tools" xml:space="preserve">
+    <value>Инструменты</value>
+  </data>
+  <data name="ClearCacheDone" xml:space="preserve">
+    <value>Очистка кэша завершена</value>
+  </data>
+  <data name="CollapseText" xml:space="preserve">
+    <value>Свернуть</value>
+  </data>
+  <data name="DownloadUpdError" xml:space="preserve">
+    <value>Не удалось загрузить обновление:</value>
+  </data>
+  <data name="ErrorText" xml:space="preserve">
+    <value>Ошибка:</value>
+  </data>
+  <data name="ExpandText" xml:space="preserve">
+    <value>Развернуть</value>
+  </data>
+  <data name="ForgetConfirmMessage" xml:space="preserve">
+    <value>Вы действительно хотите удалить "{0}" из журнала загрузок?</value>
+  </data>
+  <data name="LanguageComboBox.Header" xml:space="preserve">
+    <value>Язык приложения</value>
+  </data>
+  <data name="LaterButton" xml:space="preserve">
+    <value>Позже</value>
+  </data>
+  <data name="PkgPathError" xml:space="preserve">
+    <value>Не удалось получить путь к файлу для этой версии в манифесте репозитория.</value>
+  </data>
+  <data name="RepoUrlError" xml:space="preserve">
+    <value>URL должен начинаться с http:// или https://</value>
+  </data>
+  <data name="RepoUrlInputMessage" xml:space="preserve">
+    <value>Введите URL репозитория</value>
+  </data>
+  <data name="RestartButton" xml:space="preserve">
+    <value>Перезапустить</value>
+  </data>
+  <data name="ToastUpdateMessageFormat" xml:space="preserve">
+    <value>Приложение {0} можно обновить до версии {1}!</value>
+  </data>
+  <data name="ToastUpdateTitle" xml:space="preserve">
+    <value>Доступно обновление</value>
+  </data>
+  <data name="UnknownText" xml:space="preserve">
+    <value>неизвестно</value>
+  </data>
+  <data name="VersionComboBox.Header" xml:space="preserve">
+    <value>Версия:</value>
+  </data>
+  <data name="VersionLabelFormat" xml:space="preserve">
+    <value>Версия: {0}</value>
+  </data>
+  <data name="DelReroError" xml:space="preserve">
+    <value>Не удалось удалить репозиторий:</value>
+  </data>
+  <data name="LoadInfoErrorText" xml:space="preserve">
+    <value>Не удалось загрузить информацию</value>
+  </data>
+  <data name="SysRepoMessage" xml:space="preserve">
+    <value>Этот репозиторий является системным и не может быть удалён</value>
+  </data>
+  <data name="RepoConnectionError" xml:space="preserve">
+    <value>Ошибка подключения к сети Millennium Market</value>
+  </data>
+  <data name="RepoStatusFormat" xml:space="preserve">
+    <value>Подключено репозиториев: {0}. Последнее обновление: сегодня</value>
+  </data>
+</root>

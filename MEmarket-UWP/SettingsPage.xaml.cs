@@ -16,6 +16,10 @@ using Windows.UI.Xaml.Navigation;
 using MEmarket_UWP.Services;
 using MEmarket_UWP.Models;
 using Windows.Storage;
+using Windows.ApplicationModel;
+using Windows.ApplicationModel.Core;
+using Windows.ApplicationModel.Resources.Core;
+using Windows.Globalization;
 
 namespace MEmarket_UWP
 {
@@ -23,6 +27,8 @@ namespace MEmarket_UWP
     {
         private DataService _dataService;
         private bool _isInitializing;
+        private readonly Windows.ApplicationModel.Resources.ResourceLoader loader = Windows.ApplicationModel.Resources.ResourceLoader.GetForCurrentView();
+
 
         public SettingsPage()
         {
@@ -36,6 +42,8 @@ namespace MEmarket_UWP
             LoadRepositories();
             //LoadAndApplyTheme();
             LoadAppTypeSettings();
+            LoadAppVersion();
+            LoadLanguageSetting();
 
             var localSettings = ApplicationData.Current.LocalSettings;
             bool isEnabled = false;
@@ -74,13 +82,13 @@ namespace MEmarket_UWP
             
             if (string.IsNullOrEmpty(url))
             {
-                await ShowErrorDialog("Введите URL репозитория");
+                await ShowErrorDialog(loader.GetString("RepoUrlInputMessage"));
                 return;
             }
 
             if (!url.StartsWith("http://") && !url.StartsWith("https://"))
             {
-                await ShowErrorDialog("URL должен начинаться с http:// или https://");
+                await ShowErrorDialog(loader.GetString("RepoUrlError"));
                 return;
             }
 
@@ -92,7 +100,7 @@ namespace MEmarket_UWP
             }
             catch (Exception ex)
             {
-                await ShowErrorDialog($"Ошибка: {ex.Message}");
+                await ShowErrorDialog(loader.GetString("ErrorText") + " " + ex.Message);
             }
         }        
 
@@ -108,9 +116,9 @@ namespace MEmarket_UWP
         {
             var dialog = new ContentDialog
             {
-                Title = "Ошибка",
+                Title = "(⇀‸↼‶)",
                 Content = message,
-                CloseButtonText = "ОК"
+                PrimaryButtonText = loader.GetString("OkButton"),
             };
             await dialog.ShowAsync();
         }
@@ -181,10 +189,127 @@ namespace MEmarket_UWP
             var dialog = new ContentDialog
             {
                 Title = "(o^▽^o)",
-                Content = "Очистка кэша завершена",
-                CloseButtonText = "ОК"
+                Content = loader.GetString("ClearCacheDone"),
+                PrimaryButtonText = loader.GetString("OkButton"),
             };
             await dialog.ShowAsync();
+        }
+
+        private void LoadLanguageSetting()
+        {
+            _isInitializing = true;
+            try
+            {
+                var localSettings = ApplicationData.Current.LocalSettings;
+                string currentLanguage = null;
+
+                if (localSettings.Values.TryGetValue("AppLanguage", out object savedLanguage) && savedLanguage is string savedLanguageTag && !string.IsNullOrEmpty(savedLanguageTag))
+                {
+                    currentLanguage = savedLanguageTag;
+                }
+                else if (!string.IsNullOrEmpty(ApplicationLanguages.PrimaryLanguageOverride))
+                {
+                    currentLanguage = ApplicationLanguages.PrimaryLanguageOverride;
+                }
+                else
+                {
+                    currentLanguage = ApplicationLanguages.Languages.FirstOrDefault();
+                }
+
+                var selectedTag = currentLanguage != null && currentLanguage.StartsWith("ru", StringComparison.OrdinalIgnoreCase)
+                    ? "ru-RU"
+                    : "en-US";
+
+                LanguageComboBox.SelectedValue = selectedTag;
+                if (LanguageComboBox.SelectedIndex < 0)
+                {
+                    LanguageComboBox.SelectedIndex = selectedTag == "ru-RU" ? 0 : 1;
+                }
+            }
+            finally
+            {
+                _isInitializing = false;
+            }
+        }
+
+        private async void LanguageComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_isInitializing)
+                return;
+
+            if (LanguageComboBox.SelectedValue is string languageTag)
+            {
+                var currentLanguage = !string.IsNullOrEmpty(ApplicationLanguages.PrimaryLanguageOverride)
+                    ? ApplicationLanguages.PrimaryLanguageOverride
+                    : ApplicationLanguages.Languages.FirstOrDefault();
+
+                if (!string.Equals(currentLanguage, languageTag, StringComparison.OrdinalIgnoreCase))
+                {
+                    ApplicationLanguages.PrimaryLanguageOverride = languageTag;
+                    ApplicationData.Current.LocalSettings.Values["AppLanguage"] = languageTag;
+
+                    var dialog = new ContentDialog
+                    {
+                        Title = "(ᵔ◡ᵔ)",
+                        Content = loader.GetString("AppRestartMessage"),
+                        PrimaryButtonText = loader.GetString("RestartButton"),
+                        SecondaryButtonText = loader.GetString("LaterButton")
+                    };
+
+                    var result = await dialog.ShowAsync();
+                    if (result == ContentDialogResult.Primary)
+                    {
+                        await RestartAppAsync();
+                    }
+                }
+            }
+        }
+
+        private async Task RestartAppAsync()
+        {
+            try
+            {
+                var result = await CoreApplication.RequestRestartAsync(string.Empty);
+                if (result != (AppRestartFailureReason)0)
+                {
+                    var errorDialog = new ContentDialog
+                    {
+                        Title = "(¬_¬”)",
+                        Content = loader.GetString("AppRestartFailed"),
+                        PrimaryButtonText = loader.GetString("OkButton"),
+                    };
+                    await errorDialog.ShowAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                var errorDialog = new ContentDialog
+                {
+                    Title = "(¬_¬”)",
+                    Content = loader.GetString("AppRestartError") + "/n" + ex.Message,
+                    PrimaryButtonText = loader.GetString("OkButton"),
+                };
+                await errorDialog.ShowAsync();
+            }
+        }
+
+        private void LoadAppVersion()
+        {
+            try
+            {
+                Package package = Package.Current;
+                PackageId packageId = package.Id;
+                PackageVersion version = packageId.Version;
+                
+                string formattedVersion = $"{version.Major}.{version.Minor}.{version.Build}.{version.Revision}";
+
+                // префикс беты
+                AppVersionText.Text = formattedVersion + " (Public Beta)";
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"ыпыпыпып {ex.Message}");
+            }
         }
     }
 }

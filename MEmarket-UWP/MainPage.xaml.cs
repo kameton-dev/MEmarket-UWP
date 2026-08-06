@@ -15,11 +15,13 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using MEmarket_UWP.Services;
 using MEmarket_UWP.DataModel;
+using Windows.ApplicationModel.Core;
 using Windows.UI.Core;
 using Windows.UI.Notifications;
 using Windows.Data.Xml.Dom;
 using MEmarket_UWP.Models;
 using Windows.Storage;
+using Windows.ApplicationModel.Resources;   
 
 namespace MEmarket_UWP
 {
@@ -30,17 +32,23 @@ namespace MEmarket_UWP
         public MainPage()
         {
             this.InitializeComponent();
-            
+
+            var resourceLoader = ResourceLoader.GetForCurrentView();
+            string menuHome = resourceLoader.GetString("MenuHome");
+            string menuSearch = resourceLoader.GetString("MenuSearch");
+            string menuDownloads = resourceLoader.GetString("MenuDownloads");
+            string menuSettings = resourceLoader.GetString("MenuSettings");
+
             SystemNavigationListView.ItemsSource = new List<NavigationItem>
             {
-                new NavigationItem { IconGlyph = "\uE80F", Name = "Главная", TargetPageType = typeof(HomePage) },
-                new NavigationItem { IconGlyph = "\uE11A", Name = "Поиск", TargetPageType = typeof(SearchPage) },
-                new NavigationItem { IconGlyph = "\uE118", Name = "Загрузки и обновления", TargetPageType = typeof(InstalledAppPage) }
+                new NavigationItem { IconGlyph = "\uE80F", Name = menuHome, TargetPageType = typeof(HomePage) },
+                new NavigationItem { IconGlyph = "\uE11A", Name = menuSearch, TargetPageType = typeof(SearchPage) },
+                new NavigationItem { IconGlyph = "\uE118", Name = menuDownloads, TargetPageType = typeof(InstalledAppPage) }
             };
             
             SettingsNavigationListView.ItemsSource = new List<NavigationItem>
             {
-                new NavigationItem { IconGlyph = "\uE713", Name = "Настройки", TargetPageType = typeof(SettingsPage) }
+                new NavigationItem { IconGlyph = "\uE713", Name = menuSettings, TargetPageType = typeof(SettingsPage) }
             };
         }
 
@@ -149,10 +157,11 @@ namespace MEmarket_UWP
             }
             
             UpdateBackButtonVisibility();
-            
+            var resourceLoader = ResourceLoader.GetForCurrentView();
+
             if (e.SourcePageType == typeof(HomePage))
             {
-                TitleTextBlock.Text = "Главная";
+                TitleTextBlock.Text = resourceLoader.GetString("MenuHome");
             }
             else if (e.SourcePageType == typeof(CategoryPage))
             {
@@ -167,15 +176,15 @@ namespace MEmarket_UWP
             }
             else if (e.SourcePageType == typeof(SearchPage))
             {
-                TitleTextBlock.Text = "Поиск";
+                TitleTextBlock.Text = resourceLoader.GetString("MenuSearch");
             }
             else if (e.SourcePageType == typeof(InstalledAppPage))
             {
-                TitleTextBlock.Text = "Загрузки и обновления";
+                TitleTextBlock.Text = resourceLoader.GetString("MenuDownloads");
             }
             else if (e.SourcePageType == typeof(SettingsPage))
             {
-                TitleTextBlock.Text = "Настройки";
+                TitleTextBlock.Text = resourceLoader.GetString("MenuSettings");
             }
             else if (e.SourcePageType == typeof(RepoPropsPage))
             {
@@ -218,21 +227,35 @@ namespace MEmarket_UWP
         {
             try
             {
-                // Считываем список установленных программ из локальной JSON-БД
                 var localApps = await LocalAppsManager.LoadAppsAsync();
                 if (localApps == null || localApps.Count == 0) return;
 
-                // Опрашиваем index.json репозиториев
                 var updates = await UpdateChecker.CheckForUpdatesAsync(localApps);
 
                 UpdateChecker.CachedUpdates = updates ?? new List<UpdateableApp>();
 
                 if (updates != null && updates.Count > 0)
                 {
-                    // Найдено обновление! Показываем нативное системное Toast-уведомление
-                    foreach (var update in updates)
+                    System.Diagnostics.Debug.WriteLine($"Found {updates.Count} updates for background notification");
+                    var dispatcher = CoreApplication.MainView?.CoreWindow?.Dispatcher;
+                    if (dispatcher != null)
                     {
-                        ShowSystemToastNotification(update.Name, update.NewVersion);
+                        await dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                        {
+                            foreach (var update in updates)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"Showing toast for {update.Name} -> {update.NewVersion}");
+                                ShowSystemToastNotification(update.Name, update.NewVersion);
+                            }
+                        });
+                    }
+                    else
+                    {
+                        foreach (var update in updates)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Showing toast for {update.Name} -> {update.NewVersion}");
+                            ShowSystemToastNotification(update.Name, update.NewVersion);
+                        }
                     }
                 }
             }
@@ -242,40 +265,56 @@ namespace MEmarket_UWP
             }
         }
 
-        // 2. Создание и показ системного Toast-уведомления в стиле Windows 10
+        // 2. Создание и показ системного Toast-уведомления
         private void ShowSystemToastNotification(string appName, string newVersion)
         {
             try
             {
-                // Формируем нативный XML-шаблон для Windows 10 Mobile
+                var loader = ResourceLoader.GetForCurrentView();
+
+                string titleText = loader.GetString("ToastUpdateTitle");
+                string messageTemplate = loader.GetString("ToastUpdateMessageFormat");
+
+                string rawMessage = string.Format(messageTemplate, appName, newVersion);
+
+                string titleEscaped = EscapeXml(titleText);
+                string messageEscaped = EscapeXml(rawMessage);
+
                 string xml = $@"
                 <toast>
                     <visual>
                         <binding template='ToastGeneric'>
-                            <!-- Заголовок уведомления -->
-                            <text>Доступно обновление</text>
-                            <!-- Текст описания -->
-                            <text>Приложение {appName} можно обновить до версии {newVersion}!</text>
+                            <text>{titleEscaped}</text>
+                            <text>{messageEscaped}</text>
                         </binding>
-                     </visual>
+                    </visual>
                 </toast>";
 
                 XmlDocument doc = new XmlDocument();
                 doc.LoadXml(xml);
 
-                // Создаем объект уведомления
+                var notifier = ToastNotificationManager.CreateToastNotifier();
+                if (notifier == null)
+                {
+                    return;
+                }
+
                 ToastNotification toast = new ToastNotification(doc);
 
-                // Указываем время жизни в Центре уведомлений (например, 3 дня)
                 toast.ExpirationTime = DateTimeOffset.UtcNow.AddDays(3);
 
-                // Отправляем уведомление в систему (WinRT-метод полностью потокобезопасен)
-                ToastNotificationManager.CreateToastNotifier().Show(toast);
+                notifier.Show(toast);
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Ошибка вывода уведомления: {ex.Message}");
             }
+        }
+
+        private string EscapeXml(string input)
+        {
+            if (string.IsNullOrEmpty(input)) return string.Empty;
+            return input.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;");
         }
     }
 

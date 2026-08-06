@@ -11,22 +11,27 @@
 
     <Grid x:Name="LayoutRoot">
         <Pivot>
-            <PivotItem Header="Основные">
+            <PivotItem x:Uid="MainPivotItem" Header="Основные">
                 <StackPanel>
-                    <TextBlock Text="Показывать приложения:" Style="{ThemeResource BodyTextBlockStyle}" Margin="0,8,0,8" FontSize="16"/>
-                    <CheckBox x:Name="SilverlightCheckBox" Content="Silverlight [WP8.0-8.1]" HorizontalAlignment="Stretch" Margin="0,0,0,0" VerticalAlignment="Stretch" Checked="AppTypeFilter_Changed" Unchecked="AppTypeFilter_Changed"/>
-                    <CheckBox x:Name="WinRTCheckBox" Content="WinRT [WP8.1] (Подходит для W10M)" HorizontalAlignment="Stretch" Margin="0,0,0,0" VerticalAlignment="Stretch" Checked="AppTypeFilter_Changed" Unchecked="AppTypeFilter_Changed"/>
-                    <CheckBox x:Name="UwpCheckBox" Content="UWP [W10M]" HorizontalAlignment="Stretch" Margin="0,0,0,0.1" VerticalAlignment="Stretch" Checked="AppTypeFilter_Changed" Unchecked="AppTypeFilter_Changed"/>
+                    <TextBlock x:Uid="ShowAppsText" Text="Показывать приложения:" Style="{ThemeResource BodyTextBlockStyle}" Margin="0,8,0,8" FontSize="16"/>
+                    <CheckBox x:Name="SilverlightCheckBox" Content="Silverlight [WP8.0-8.1 only]" HorizontalAlignment="Stretch" Margin="0,0,0,0" VerticalAlignment="Stretch" Checked="AppTypeFilter_Changed" Unchecked="AppTypeFilter_Changed"/>
+                    <CheckBox x:Name="WinRTCheckBox" Content="WinRT [WP8.1] (W10M)" HorizontalAlignment="Stretch" Margin="0,0,0,0" VerticalAlignment="Stretch" Checked="AppTypeFilter_Changed" Unchecked="AppTypeFilter_Changed"/>
+                    <CheckBox x:Name="UwpCheckBox" Content="UWP [W10M only]" HorizontalAlignment="Stretch" Margin="0,0,0,16" VerticalAlignment="Stretch" Checked="AppTypeFilter_Changed" Unchecked="AppTypeFilter_Changed"/>
 
-                    <ToggleSwitch x:Name="BackgroundUpdateToggle" Header="Проверка обновлений в фоне при старте заходе в приложение" HorizontalAlignment="Stretch" Margin="0,8,0,0" VerticalAlignment="Stretch" Toggled="BackgroundUpdateToggle_Toggled"/>
+                    <ComboBox x:Uid="LanguageComboBox" x:Name="LanguageComboBox" Header="Язык" SelectedValuePath="Tag" SelectionChanged="LanguageComboBox_SelectionChanged" Margin="0,0,0,8">
+                        <ComboBoxItem Tag="en-US">English</ComboBoxItem>
+                        <ComboBoxItem Tag="ru-RU">Русский</ComboBoxItem>
+                    </ComboBox>
+
+                    <ToggleSwitch x:Uid="BackgroundUpdateToggle" x:Name="BackgroundUpdateToggle" Header="Проверять обновления в фоне" HorizontalAlignment="Stretch" Margin="0,8,0,0" VerticalAlignment="Stretch" Toggled="BackgroundUpdateToggle_Toggled"/>
                     
                     <Border Height="1" Background="{ThemeResource SystemControlForegroundBaseMediumLowBrush}" Opacity="0.3" Margin="8,16,8,16"/>
 
-                    <Button Content="Очистить кэш" HorizontalAlignment="Left" VerticalAlignment="Top" Click="ClearCacheButton_Click"/>
+                    <Button x:Uid="ClearCache" Content="Очистить кэш" HorizontalAlignment="Left" VerticalAlignment="Top" Click="ClearCacheButton_Click"/>
                 </StackPanel>
             </PivotItem>
             
-            <PivotItem Header="Репозитории" Margin="0,0,0,0">
+            <PivotItem x:Uid="RepoPivotItem" Header="Репозитории" Margin="0,0,0,0">
                 <Grid>
                     <ScrollViewer>
                         <StackPanel>
@@ -35,11 +40,11 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox x:Name="RepositoryUrlTextBox" 
+                                <TextBox x:Uid="RepositoryUrlTextBox" x:Name="RepositoryUrlTextBox" 
                                  PlaceholderText="Введите URL репозитория..."
                                  Grid.Column="0"
                                  Margin="0,0,9.5,0"/>
-                                <Button x:Name="AddRepositoryButton"
+                                <Button x:Uid="AddRepositoryButton" x:Name="AddRepositoryButton"
                                 Grid.Column="1"
                                 Content="Добавить"
                                 Click="AddRepositoryButton_Click"
@@ -73,7 +78,7 @@
                 </Grid>
             </PivotItem>
 
-            <PivotItem Header="О программе">
+            <PivotItem x:Uid="AboutPivotItem" Header="О программе">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="0,7.7,0,16">
                         <Border Background="{ThemeResource SystemControlBackgroundAccentBrush}" Margin="0,0,8,0" Padding="4,4,4,4">
@@ -81,9 +86,15 @@
                         </Border>
                         <TextBlock Text="MEmarket UWP" VerticalAlignment="Center" FontSize="20" FontFamily="Segoe UI Semilight"/>
                     </StackPanel>
-                    <TextBlock Text="Версия 0.1.2.0 (Public Beta)" TextWrapping="Wrap" Margin="0,0,0,8"/>
-                    <TextBlock Text="Данный клиент находится на этапе разработки. Возможны баги, зависания и микрофризы" Foreground="Red" TextWrapping="Wrap" Margin="0,0,0,8"/>
-                    <TextBlock Text="© 2026 kameton.dev. Гойда ＼(°O°)／." Style="{ThemeResource BodyTextBlockStyle}" Opacity="0.6"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <!-- Этот блок будет переводиться автоматически на русский/английский -->
+                        <TextBlock x:Uid="VersionLabel" Text="Версия" Style="{ThemeResource BodyTextBlockStyle}"/>
+
+                        <!-- Сюда C# код подставит цифры версии из манифеста -->
+                        <TextBlock x:Name="AppVersionText" Text="0.0.0.0 (Public Beta)" Style="{ThemeResource BodyTextBlockStyle}" Margin="5,0,0,0"/>
+                    </StackPanel>
+                    <TextBlock x:Uid="WarningText" Text="Данный клиент находится на этапе разработки. Возможны баги, зависания и микрофризы" Foreground="Red" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                    <TextBlock Text="© 2026 kameton.dev. Nya ＼(°O°)／." Style="{ThemeResource BodyTextBlockStyle}" Opacity="0.6"/>
                 </StackPanel>
             </PivotItem>
         </Pivot>

@@ -14,6 +14,8 @@ namespace MEmarket_UWP
     {
         private Repository _currentRepository;
         private readonly DataService _dataService;
+        private readonly Windows.ApplicationModel.Resources.ResourceLoader loader = Windows.ApplicationModel.Resources.ResourceLoader.GetForCurrentView();
+
 
         public RepoPropsPage()
         {
@@ -60,8 +62,8 @@ namespace MEmarket_UWP
             }
             catch (Exception)
             {
-                CreatorTextBlock.Text = "Не удалось загрузить информацию";
-                LastUpdatedTextBlock.Text = "Не удалось загрузить информацию";
+                CreatorTextBlock.Text = loader.GetString("LoadInfoErrorText");
+                LastUpdatedTextBlock.Text = loader.GetString("LoadInfoErrorText");
             }
         }
 
@@ -95,8 +97,8 @@ namespace MEmarket_UWP
                 var dialog = new ContentDialog
                 {
                     Title = "(￣▽￣)",
-                    Content = "Этот репозиторий является системным и не может быть удалён",
-                    CloseButtonText = "ОК"
+                    Content = loader.GetString("SysRepoMessage"),
+                    PrimaryButtonText = loader.GetString("OkButton")
                 };
                 await dialog.ShowAsync();
                 return;
@@ -115,8 +117,8 @@ namespace MEmarket_UWP
                 var dialog = new ContentDialog
                 {
                     Title = "╮(￣ω￣;)╭ ",
-                    Content = $"Не удалось удалить репозиторий: {ex.Message}",
-                    CloseButtonText = "ОК"
+                    Content = loader.GetString("DelRepoError") + " " + ex.Message,
+                    PrimaryButtonText = loader.GetString("OkButton")
                 };
                 await dialog.ShowAsync();
             }

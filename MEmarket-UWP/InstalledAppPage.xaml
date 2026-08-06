@@ -15,9 +15,9 @@
                 <!-- Обновления -->
                 <StackPanel x:Name="UpdatesSection" Margin="0,8,0,24">
                     <RelativePanel Margin="12,0,12,16">
-                        <TextBlock Text="Доступные обновления" FontSize="24" FontWeight="SemiLight" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignVerticalCenterWithPanel="True"/>
+                        <TextBlock x:Uid="AvailableUpd" Text="Доступные обновления" FontSize="24" FontWeight="SemiLight" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignVerticalCenterWithPanel="True"/>
                     </RelativePanel>
-                    <Button x:Name="CheckUpdatesButton" Content="Проверить обновления" Click="CheckUpdatesButton_Click" Margin="12,0,0,8"/>
+                    <Button x:Uid="CheckUpdatesButton" x:Name="CheckUpdatesButton" Content="Проверить обновления" Click="CheckUpdatesButton_Click" Margin="12,0,0,8"/>
 
                     <ListView x:Name="UpdatesListView" 
                               IsItemClickEnabled="True"
@@ -64,8 +64,9 @@
 
                 <!-- Установленные приложения -->
                 <StackPanel x:Name="InstalledSection">
-                    <TextBlock Text="Установленные пакеты" Margin="12,0,12,16"  FontSize="24" FontWeight="SemiLight"/>
-                    <TextBlock x:Name="NoAppsTextBlock" 
+                    <TextBlock x:Uid="DownloadedApps" Text="Установленные пакеты" Margin="12,0,12,16"  FontSize="24" FontWeight="SemiLight"/>
+                    <TextBlock x:Name="NoAppsTextBlock"
+                               x:Uid="NoAppsTextBlock"
                                Text="Вы еще не устанавливали приложения из MEmarket." 
                                FontSize="14" 
                                Opacity="0.6" 

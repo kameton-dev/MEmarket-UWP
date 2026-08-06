@@ -19,6 +19,7 @@ namespace MEmarket_UWP
     {
         public ObservableCollection<TrackedApp> InstalledApps { get; set; } = new ObservableCollection<TrackedApp>();
         public ObservableCollection<UpdateableApp> AvailableUpdates { get; set; } = new ObservableCollection<UpdateableApp>();
+        private readonly Windows.ApplicationModel.Resources.ResourceLoader loader = Windows.ApplicationModel.Resources.ResourceLoader.GetForCurrentView();
 
         public InstalledAppPage()
         {
@@ -93,8 +94,8 @@ namespace MEmarket_UWP
                 var dialog = new ContentDialog
                 {
                     Title = "(≧◡≦)",
-                    Content = "Все ваши приложения обновлены до актуальной версии.",
-                    CloseButtonText = "OK"
+                    Content = loader.GetString("AllAppsUpd"),
+                    PrimaryButtonText = loader.GetString("OkButton")
                 };
                 await dialog.ShowAsync();
             }
@@ -172,8 +173,8 @@ namespace MEmarket_UWP
                             var dialog = new ContentDialog
                             {
                                 Title = "(_　_|||)",
-                                Content = "Не удалось запустить файл установки пакета",
-                                CloseButtonText = "ОК"
+                                Content = loader.GetString("StartPackageError"),
+                                PrimaryButtonText = loader.GetString("OkButton")
                             };
                             await dialog.ShowAsync();
                         }
@@ -211,8 +212,8 @@ namespace MEmarket_UWP
                         var dialog = new ContentDialog
                         {
                             Title = "┐(￣ヘ￣;)┌",
-                            Content = "Не удалось получить путь к файлу для этой версии в манифесте репозитория.",
-                            CloseButtonText = "ОК"
+                            Content = loader.GetString("PkgPathError"),
+                            PrimaryButtonText = loader.GetString("OkButton")
                         };
                         await dialog.ShowAsync();
                     }
@@ -223,7 +224,7 @@ namespace MEmarket_UWP
                 var dialog = new ContentDialog
                 {
                     Title = "╮( ˘ ､ ˘ )╭",
-                    Content = $"Не удалось загрузить обновление: {ex.Message}",
+                    Content = loader.GetString("DownloadUpdError") + "/n" + ex.Message,
                     CloseButtonText = "ОК"
                 };
                 await dialog.ShowAsync();
@@ -286,13 +287,16 @@ namespace MEmarket_UWP
 
             var appToForget = menuItem.DataContext as TrackedApp;
             if (appToForget == null) return;
-            
+            var loader = Windows.ApplicationModel.Resources.ResourceLoader.GetForCurrentView();
+            string messageTemplate = loader.GetString("ForgetConfirmMessage");
+            string formattedMessage = string.Format(messageTemplate, appToForget.Name);
+
             ContentDialog confirmDialog = new ContentDialog
             {
                 Title = "【・_・?】",
-                Content = $"Вы действительно хотите удалить \"{appToForget.Name}\" из журнала?",
-                PrimaryButtonText = "Удалить",
-                CloseButtonText = "Отмена"
+                Content = formattedMessage,
+                PrimaryButtonText = loader.GetString("OkButton"),
+                SecondaryButtonText = loader.GetString("CancelButton")
             };
 
             ContentDialogResult result = await confirmDialog.ShowAsync();

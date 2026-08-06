@@ -14,7 +14,8 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <TextBox x:Name="SearchTextBox" 
+        <TextBox x:Name="SearchTextBox"
+                 x:Uid="SearchTextBox"
                  PlaceholderText="Поиск приложений"
                  Grid.Row="0"
                  Margin="12,8,12,8"
@@ -47,7 +48,8 @@
             </ListView.ItemTemplate>
         </ListView>
 
-        <TextBlock x:Name="NoResultsText" 
+        <TextBlock x:Uid="NoResultsText"
+                   x:Name="NoResultsText" 
                    Grid.Row="1"
                    Text="Введите запрос для поиска"
                    HorizontalAlignment="Center" 

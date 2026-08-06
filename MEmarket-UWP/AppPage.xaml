@@ -9,69 +9,120 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid x:Name="LayoutRoot">
-        <Grid Grid.Row="1" x:Name="ContentRoot">
+        <Grid x:Name="ContentRoot">
             <ScrollViewer>
-                <StackPanel Margin="12,12,12,0">
-                    <StackPanel Grid.Row="0" Margin="0,0,0,16" Orientation="Horizontal">
-                        <Image x:Name="AppIcon" Source="ms-appx:///Assets/StoreLogo.png" Width="80" Height="76" Margin="0,0,0,0" HorizontalAlignment="Left" ImageFailed="IconImage_ImageFailed"/>
-                        <StackPanel>
-                            <TextBlock x:Name="AppNameText" Text="" Style="{ThemeResource TitleTextBlockStyle}" Margin="8,0,0,0" CharacterSpacing="{ThemeResource PivotHeaderItemCharacterSpacing}"/>
-                            <TextBlock x:Name="PublisherText" Text="" Style="{ThemeResource BodyTextBlockStyle}" FontSize="16" Margin="8,0,0,0"/>
-                        </StackPanel>
+                <StackPanel>
+
+                    <!-- ВЕРХНИЙ БЛОК: Баннер 16:9 и накладывающийся блок информации -->
+                    <Grid Margin="0,0,0,16">
+                        <Grid.RowDefinitions>
+                            <!-- Высота баннера. На типичном экране W10M (шириной 360px) высота 202px дает идеальное соотношение 16:9 -->
+                            <RowDefinition Height="202"/>
+                            <!-- Строка для иконки и названия -->
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- 1. Баннер на всю ширину (Строка 0) -->
+                        <Grid Grid.Row="0" Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}">
+                            <Image x:Name="AppBannerImage"
+                                   Stretch="UniformToFill" 
+                                   HorizontalAlignment="Center" 
+                                   VerticalAlignment="Center"/>
+
+                            <!-- Мягкий затемняющий градиент внизу баннера, чтобы белый текст читался на любом фоне -->
+                            <Border VerticalAlignment="Bottom" Height="80">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                        <GradientStop Color="#00000000" Offset="0" />
+                                        <GradientStop Color="#B2000000" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                            </Border>
+                        </Grid>
+
+                        <!-- 2. Блок иконки и названия (Строка 1) -->
+                        <!-- Отрицательный Margin в -36px выталкивает этот блок вверх, заставляя его налезать на баннер -->
+                        <Grid Grid.Row="1" Margin="16,-36,16,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Квадратная иконка приложения. Обернута в Border с рамкой под цвет фона страницы.
+                                 Это создает красивый "вырез" вокруг иконки, отделяя её от картинки баннера -->
+                            <Border Grid.Column="0" Width="80" Height="80" Background="{ThemeResource SystemControlBackgroundAccentBrush}" VerticalAlignment="Center">
+                                <Image x:Name="AppIcon" 
+                                       Source="ms-appx:///Assets/StoreLogo.png" 
+                                       Stretch="UniformToFill" 
+                                       ImageFailed="IconImage_ImageFailed"/>
+                            </Border>
+
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="12,0,0,0">
+                                <TextBlock x:Name="AppNameText" Text="" Style="{ThemeResource TitleTextBlockStyle}" TextWrapping="Wrap" MaxLines="2"/>
+                                <TextBlock x:Name="PublisherText" Text="" Style="{ThemeResource BodyTextBlockStyle}" FontSize="14" Opacity="0.6"/>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+
+                    <!-- НИЖНИЙ БЛОК: Кнопки, описание и подробности -->
+                    <!-- Переместили боковой отступ 16px сюда для выравнивания всех элементов -->
+                    <StackPanel Margin="16,0,16,24">
+
+                        
+
+                        <Button x:Uid="DownloadButton" x:Name="DownloadButton" Content="Скачать" Click="Download_Click" Margin="0,0,0,8" HorizontalAlignment="Left" Width="150"/>
+
+                        <ProgressBar x:Name="DownloadProgressBar" Minimum="0" Maximum="100" Value="0" Height="5" Margin="0,0,0,8" Visibility="Collapsed"/>
+
+                        <TextBlock x:Name="SummaryText" Text="" TextWrapping="Wrap" Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,16" FontSize="16" FontWeight="Bold"/>
+
+                        <TextBlock x:Uid="DescriptionHeader" Text="Описание" Margin="0,0,0,8" FontSize="24" FontWeight="SemiLight"/>
+                        <RichTextBlock x:Name="DescriptionText"/>
+                        <HyperlinkButton x:Name="ToggleDescriptionButton" Content="Развернуть" HorizontalAlignment="Left" Click="ToggleDescriptionButton_Click" Margin="0,0,0,16" Visibility="Collapsed"/>
+
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Margin="0,0,0,16" Visibility="Collapsed" x:Name="ScreenshotsScrollViewer">
+                            <ListView x:Name="ScreenshotsListView" Margin="0,0,0,0">
+                                <ListView.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal"/>
+                                    </ItemsPanelTemplate>
+                                </ListView.ItemsPanel>
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Image Source="{Binding}" Width="225" Height="325" Margin="0,0,8,0" Stretch="UniformToFill" Tapped="Screenshot_Tapped" />
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </ScrollViewer>
+
+                        <TextBlock x:Uid="DetailsHeader" Text="ЫЫЫ" Margin="0,0,0,8" FontSize="24" FontWeight="SemiLight" SelectionChanged="TextBlock_SelectionChanged"/>
+
+                        <ComboBox x:Name="VersionComboBox" 
+                                  x:Uid="VersionComboBox"
+                                  PlaceholderText="выбрать версию" 
+                                  Visibility="Collapsed" 
+                                  SelectionChanged="VersionComboBox_SelectionChanged"
+                                  DisplayMemberPath="Version"
+                                  Margin="0,0,0,8"
+                                  Header="Версия:">
+                        </ComboBox>
+                        <TextBlock x:Name="AppVersionText" Text="" Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,8" FontSize="16"/>
+
+                        <TextBlock x:Uid="CapabilitiesText" x:Name="CapabilitiesText" Text="Возможности:" Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,8" FontSize="16" Visibility="Collapsed"/>
+                        <ItemsControl x:Name="CapabilitiesList" Margin="0,0,0,16" Visibility="Collapsed">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                        <TextBlock Text="• " Style="{ThemeResource BodyTextBlockStyle}"/>
+                                        <TextBlock Text="{Binding}" Style="{ThemeResource BodyTextBlockStyle}" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock x:Name="AppTypeText" Text="Тип приложения: " Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,16" FontSize="16" Visibility="Collapsed"/>
+
                     </StackPanel>
 
-                    <ComboBox x:Name="VersionComboBox" 
-                              PlaceholderText="выбрать версию" 
-                              Visibility="Collapsed" 
-                              SelectionChanged="VersionComboBox_SelectionChanged"
-                              DisplayMemberPath="Version"
-                              Margin="0,0,0,16"
-                              Header="Версия:">
-                    </ComboBox>
-                    <TextBlock x:Name="AppVersionText" Text="" Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,16" FontSize="16"/>
-
-                    <Button x:Name="DownloadButton" Content="Скачать" Click="Download_Click" Margin="0,0,0,8" HorizontalAlignment="Left" Width="150"/>
-
-                    <ProgressBar x:Name="DownloadProgressBar" Minimum="0" Maximum="100" Value="0" Height="5" Margin="0,0,0,8" Visibility="Collapsed"/>
-                    
-                    <TextBlock x:Name="SummaryText" Text="" TextWrapping="Wrap" Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,16" FontSize="16" FontWeight="Bold"/>
-
-                    <TextBlock Text="Описание" Margin="0,0,0,8"  FontSize="24" FontWeight="SemiLight"/>
-                    <RichTextBlock x:Name="DescriptionText" Margin="0,0,0,16"/>
-                    <HyperlinkButton x:Name="ToggleDescriptionButton" Content="Развернуть" HorizontalAlignment="Left" Click="ToggleDescriptionButton_Click" Margin="0,0,0,16" Visibility="Collapsed"/>
-
-                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Margin="0,0,0,16" Visibility="Collapsed" x:Name="ScreenshotsScrollViewer">
-                        <ListView x:Name="ScreenshotsListView" Margin="0,0,0,0">
-                            <ListView.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel Orientation="Horizontal"/>
-                                </ItemsPanelTemplate>
-                            </ListView.ItemsPanel>
-                            <ListView.ItemTemplate>
-                                <DataTemplate>
-                                    <Image Source="{Binding}" Width="225" Height="325" Margin="0,0,8,0" Stretch="UniformToFill" Tapped="Screenshot_Tapped" />
-                                </DataTemplate>
-                            </ListView.ItemTemplate>
-                        </ListView>
-                    </ScrollViewer>
-
-                    <TextBlock Text="Подробности" Margin="0,0,0,8"  FontSize="24" FontWeight="SemiLight"/>
-                    
-                    <!-- <TextBlock x:Name="AppSizeText" Text="Размер: " Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,8" FontSize="16"/> 
-                    <TextBlock x:Name="MinVersionText" Text="Мин. версия: " Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,8" FontSize="16"/> -->
-                    <TextBlock x:Name="CapabilitiesText" Text="Возможности:" Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,8" FontSize="16" Visibility="Collapsed"/>
-                    <ItemsControl x:Name="CapabilitiesList" Margin="0,0,0,16" Visibility="Collapsed">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                                    <TextBlock Text="• " Style="{ThemeResource BodyTextBlockStyle}"/>
-                                    <TextBlock Text="{Binding}" Style="{ThemeResource BodyTextBlockStyle}" TextWrapping="Wrap"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                    <TextBlock x:Name="AppTypeText" Text="Тип приложения: " Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,16" FontSize="16" Visibility="Collapsed"/>
-                    
                 </StackPanel>
             </ScrollViewer>
         </Grid>

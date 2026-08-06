@@ -8,6 +8,7 @@ using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -16,6 +17,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using Windows.Globalization;
 using MEmarket_UWP.Services;
 
 namespace MEmarket_UWP
@@ -66,6 +68,9 @@ namespace MEmarket_UWP
             {
                 if (rootFrame.Content == null)
                 {
+                    // Apply saved language override before UI is built
+                    ApplySavedLanguageOverride();
+
                     // Initialize data service
                     await DataService.GetInstance().InitializeAsync();
 
@@ -134,6 +139,22 @@ namespace MEmarket_UWP
             SystemNavigationManager.GetForCurrentView().BackRequested -= OnBackRequested;
 
             deferral.Complete();
+        }
+
+        private void ApplySavedLanguageOverride()
+        {
+            try
+            {
+                var localSettings = ApplicationData.Current.LocalSettings;
+                if (localSettings.Values.TryGetValue("AppLanguage", out object savedLanguage) && savedLanguage is string languageTag && !string.IsNullOrEmpty(languageTag))
+                {
+                    ApplicationLanguages.PrimaryLanguageOverride = languageTag;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"ApplySavedLanguageOverride error: {ex.Message}");
+            }
         }
     }
 }

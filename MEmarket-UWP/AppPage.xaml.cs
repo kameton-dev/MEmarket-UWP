@@ -22,6 +22,7 @@ using Windows.Web.Http;
 using MEmarket_UWP.Services;
 using MEmarket_UWP.Models;
 using Windows.Data.Json;
+using Windows.Globalization;
 using Windows.UI.Xaml.Documents;
 
 namespace MEmarket_UWP
@@ -34,6 +35,8 @@ namespace MEmarket_UWP
         private DispatcherTimer _downloadAnimationTimer;
         private int _downloadDotCount;
         private bool _isDescriptionExpanded;
+
+        private readonly Windows.ApplicationModel.Resources.ResourceLoader loader = Windows.ApplicationModel.Resources.ResourceLoader.GetForCurrentView();
 
         public AppPage()
         {
@@ -86,6 +89,22 @@ namespace MEmarket_UWP
                 catch (Exception ex)
                 {
                     System.Diagnostics.Debug.WriteLine($"Error loading icon: {ex.Message}");
+                }
+            }
+
+            if (!string.IsNullOrEmpty(_currentApp.Banner))
+            {
+                var bannerValue = _currentApp.Banner.Trim();
+                try
+                {
+                    var uriString = bannerValue.StartsWith("http", StringComparison.OrdinalIgnoreCase)
+                        ? bannerValue
+                        : $"ms-appx:///{bannerValue}";
+                    AppBannerImage.Source = new BitmapImage(new Uri(uriString, UriKind.Absolute));
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error loading banner: {ex.Message}");
                 }
             }
 
@@ -142,11 +161,11 @@ namespace MEmarket_UWP
                     if (!string.IsNullOrEmpty(title))
                         app.Name = title;
 
-                    var description = GetJsonString(root, "description");
+                    var description = GetJsonLocalizedString(root, "description");
                     if (!string.IsNullOrEmpty(description))
                         app.Description = description;
 
-                    var summary = GetJsonString(root, "summary");
+                    var summary = GetJsonLocalizedString(root, "summary");
                     if (!string.IsNullOrEmpty(summary))
                         app.Summary = summary;
 
@@ -176,6 +195,13 @@ namespace MEmarket_UWP
                     {
                         app.Icon = CombineUrls(app.AppUrl, iconValue);
                         System.Diagnostics.Debug.WriteLine($"LoadEntryJsonAsync: Icon set to {app.Icon}");
+                    }
+
+                    var bannerValue = GetJsonString(root, "banner");
+                    if (!string.IsNullOrEmpty(bannerValue))
+                    {
+                        app.Banner = CombineUrls(app.AppUrl, bannerValue);
+                        System.Diagnostics.Debug.WriteLine($"LoadEntryJsonAsync: Banner set to {app.Banner}");
                     }
 
                     var downloadUrl = GetJsonString(root, "download_url");
@@ -288,6 +314,8 @@ namespace MEmarket_UWP
                     ScreenshotsScrollViewer.Visibility = Visibility.Visible;
                     ScreenshotsListView.ItemsSource = app.Screenshots;
                 }
+
+                UpdateAppInfo();
             }
             catch { }
         }
@@ -303,6 +331,73 @@ namespace MEmarket_UWP
                 }
             }
             return string.Empty;
+        }
+
+        private string GetJsonLocalizedString(JsonObject obj, string key)
+        {
+            if (!obj.ContainsKey(key))
+                return string.Empty;
+
+            var value = obj.GetNamedValue(key);
+            if (value.ValueType == JsonValueType.String)
+                return value.GetString();
+
+            if (value.ValueType == JsonValueType.Object)
+            {
+                try
+                {
+                    var localizedObj = value.GetObject();
+                    var preferredLanguage = GetCurrentLanguageCode();
+
+                    if (!string.IsNullOrEmpty(preferredLanguage) && localizedObj.ContainsKey(preferredLanguage))
+                    {
+                        var localizedValue = localizedObj.GetNamedValue(preferredLanguage);
+                        if (localizedValue.ValueType == JsonValueType.String)
+                            return localizedValue.GetString();
+                    }
+
+                    if (localizedObj.ContainsKey("en"))
+                    {
+                        var englishValue = localizedObj.GetNamedValue("en");
+                        if (englishValue.ValueType == JsonValueType.String)
+                            return englishValue.GetString();
+                    }
+
+                    if (localizedObj.ContainsKey("ru"))
+                    {
+                        var russianValue = localizedObj.GetNamedValue("ru");
+                        if (russianValue.ValueType == JsonValueType.String)
+                            return russianValue.GetString();
+                    }
+
+                    foreach (var pair in localizedObj)
+                    {
+                        if (pair.Value.ValueType == JsonValueType.String)
+                            return pair.Value.GetString();
+                    }
+                }
+                catch { }
+            }
+
+            return string.Empty;
+        }
+
+        private string GetCurrentLanguageCode()
+        {
+            var currentLanguage = !string.IsNullOrEmpty(ApplicationLanguages.PrimaryLanguageOverride)
+                ? ApplicationLanguages.PrimaryLanguageOverride
+                : ApplicationLanguages.Languages.FirstOrDefault();
+
+            if (string.IsNullOrEmpty(currentLanguage))
+                return string.Empty;
+
+            if (currentLanguage.StartsWith("ru", StringComparison.OrdinalIgnoreCase))
+                return "ru";
+
+            if (currentLanguage.StartsWith("en", StringComparison.OrdinalIgnoreCase))
+                return "en";
+
+            return currentLanguage.Split('-').FirstOrDefault() ?? string.Empty;
         }
 
         private string CombineUrls(string baseUrl, string relativePath)
@@ -379,7 +474,9 @@ namespace MEmarket_UWP
         private void ToggleDescriptionButton_Click(object sender, RoutedEventArgs e)
         {
             _isDescriptionExpanded = !_isDescriptionExpanded;
-            ToggleDescriptionButton.Content = _isDescriptionExpanded ? "Свернуть" : "Развернуть";
+            ToggleDescriptionButton.Content = _isDescriptionExpanded
+                ? loader.GetString("CollapseText")
+                : loader.GetString("ExpandText");
             DescriptionText.MaxLines = _isDescriptionExpanded ? int.MaxValue : 5;
         }
 
@@ -389,7 +486,7 @@ namespace MEmarket_UWP
             
             if (_currentApp == null)
             {
-                await ShowDialogAsync("(◑_◑)", "Ссылка на скачивание недоступна");
+                await ShowDialogAsync("(◑_◑)", loader.GetString("DownloadUrlNotAvailable"));
                 return;
             }
 
@@ -399,7 +496,7 @@ namespace MEmarket_UWP
             if (string.IsNullOrEmpty(downloadUrl))
             {
                 System.Diagnostics.Debug.WriteLine($"Download_Click: DownloadUrl is empty. _selectedVersion?.DownloadUrl={_selectedVersion?.DownloadUrl}, _currentApp.DownloadUrl={_currentApp.DownloadUrl}");
-                await ShowDialogAsync("(｡╯︵╰｡) ", "Ссылка на скачивание недоступна");
+                await ShowDialogAsync("(｡╯︵╰｡) ", loader.GetString("DownloadUrlNotAvailable"));
                 return;
             }
 
@@ -493,10 +590,9 @@ namespace MEmarket_UWP
                     var dialog = new ContentDialog
                     {
                         Title = "(¬‿¬)",
-                        Content = "Файлы XAP не поддерживаются Установщиком Приложений",
-                        PrimaryButtonText = "Сохранить файл",
-                        CloseButtonText = "ОК",
-                        DefaultButton = ContentDialogButton.Close
+                        Content = loader.GetString("XapNotSupportedMessage"),
+                        PrimaryButtonText = loader.GetString("SaveFileButton"),
+                        SecondaryButtonText = loader.GetString("OkButton")
                     };
 
                     var result = await dialog.ShowAsync();
@@ -508,7 +604,7 @@ namespace MEmarket_UWP
                     await HideSystemStatusAsync();
                     return;
                 }
-                else if (extension != ".appx" && extension != ".appxbundle" && extension != ".msix" && extension != ".msixbundle")
+                /*else if (extension != ".appx" && extension != ".appxbundle" && extension != ".msix" && extension != ".msixbundle")
                 {
                     var allow = await ConfirmAsync("Формат файла не типичен для установки приложения. Продолжить скачивание и попытку установки?");
                     if (!allow)
@@ -516,7 +612,7 @@ namespace MEmarket_UWP
                         await HideSystemStatusAsync();
                         return;
                     }
-                }
+                }*/
 
                 var folder = ApplicationData.Current.LocalFolder;
                 var file = await folder.CreateFileAsync(fileName, CreationCollisionOption.ReplaceExisting);
@@ -543,23 +639,21 @@ namespace MEmarket_UWP
                 var launched = await Launcher.LaunchFileAsync(file, launchOptions);
                 if (!launched)
                 {
-                    await ShowDialogAsync("┐( ˘_˘ )┌", "Не удалось открыть файл установки.");
+                    await ShowDialogAsync("┐( ˘_˘ )┌", loader.GetString("LaunchInstallErrorMessage"));
                 }
                 else
                 {
-                    // Системный установщик успешно запущен! Сохраняем приложение в локальную БД.
                     try
                     {
-                        // Определяем версию, которую выбрал пользователь (из выпадающего списка или дефолтную)
                         string versionToSave = _selectedVersion?.Version ?? _currentApp.Version;
 
                         await LocalAppsManager.RegisterInstalledAppAsync(
-                            _currentApp.Id,               // Уникальный ID ("2dcfeda8-...")
-                            _currentApp.Name,             // Название ("Avito")
-                            _currentApp.Icon,             // Ссылка на иконку
-                            versionToSave,                // Установленная версия
-                            _currentApp.BaseUrl,          // Корень репозитория (например, http://canary.millenniummarket.ru)
-                            _currentApp.AppUrl            // Персональный AppUrl (.../metadata/avito.cmp/)
+                            _currentApp.Id,               
+                            _currentApp.Name,
+                            _currentApp.Icon,
+                            versionToSave,
+                            _currentApp.BaseUrl,
+                            _currentApp.AppUrl
                         );
 
                         System.Diagnostics.Debug.WriteLine($"Приложение успешно зарегистрировано в локальной БД: {_currentApp.Name} (v{versionToSave})");
@@ -574,7 +668,7 @@ namespace MEmarket_UWP
             {
                 _downloadAnimationTimer.Stop();
                 await HideSystemStatusAsync();
-                await ShowDialogAsync(">_<", $"Не удалось скачать приложение: {ex.Message}");
+                await ShowDialogAsync(">_<", loader.GetString("DownloadErrorMessage") + " " + ex.Message);
                 return;
             }
             finally
@@ -590,9 +684,8 @@ namespace MEmarket_UWP
             {
                 Title = "(＾＾＃) ",
                 Content = message,
-                PrimaryButtonText = "Продолжить",
-                CloseButtonText = "Отмена",
-                DefaultButton = ContentDialogButton.Primary
+                PrimaryButtonText = loader.GetString("ContinueButton"),
+                SecondaryButtonText = loader.GetString("CancelButton")
             };
 
             var result = await dialog.ShowAsync();
@@ -679,11 +772,11 @@ namespace MEmarket_UWP
                     }
                 }
 
-                await ShowDialogAsync("Готово", $"Файл сохранен в папку: {folder.Path}");
+                await ShowDialogAsync("(＾▽＾)", loader.GetString("FileSavedDir") + " " + folder.Path);
             }
             catch (Exception ex)
             {
-                await ShowDialogAsync("Ошибка", $"Не удалось сохранить файл: {ex.Message}");
+                await ShowDialogAsync("(_　_|||)", loader.GetString("FileSavedDirError") + " " + ex.Message);
             }
             finally
             {
@@ -711,7 +804,10 @@ namespace MEmarket_UWP
             {
                 AppVersionText.Visibility = Visibility.Visible;
                 VersionComboBox.Visibility = Visibility.Collapsed;
-                AppVersionText.Text = $"Версия: {(_currentApp.Version ?? "Неизвестно")}";
+                string versionValue = !string.IsNullOrEmpty(_currentApp.Version)
+                    ? _currentApp.Version
+                    : loader.GetString("UnknownText");
+                AppVersionText.Text = string.Format(loader.GetString("VersionLabelFormat"), versionValue);
                 _selectedVersion = null;
             }
         }
@@ -754,7 +850,7 @@ namespace MEmarket_UWP
             {
                 Title = title,
                 Content = content,
-                CloseButtonText = "ОК"
+                PrimaryButtonText = loader.GetString("OkButton")
             };
 
             await dialog.ShowAsync();
@@ -772,7 +868,9 @@ namespace MEmarket_UWP
             if (HasLongDescription(description))
             {
                 ToggleDescriptionButton.Visibility = Visibility.Visible;
-                ToggleDescriptionButton.Content = _isDescriptionExpanded ? "Свернуть" : "Развернуть";
+                ToggleDescriptionButton.Content = _isDescriptionExpanded
+                    ? loader.GetString("CollapseText")
+                    : loader.GetString("ExpandText");
             }
             else
             {
@@ -832,10 +930,15 @@ namespace MEmarket_UWP
                 {
                     Title = "",
                     Content = new Image { Source = bitmapImage, Width = 300, Height = 400, Stretch = Stretch.Uniform },
-                    CloseButtonText = "Закрыть"
+                    PrimaryButtonText = loader.GetString("CloseButton")
                 };
                 await dialog.ShowAsync();
             }
+        }
+
+        private void TextBlock_SelectionChanged(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

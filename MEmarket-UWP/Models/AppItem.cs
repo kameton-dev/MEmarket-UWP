@@ -9,6 +9,7 @@ namespace MEmarket_UWP.Models
         public string Summary { get; set; }
         public string Description { get; set; }
         public string Icon { get; set; }
+        public string Banner { get; set; }
         public string Publisher { get; set; }
         public string DownloadUrl { get; set; }
         public string CertificateUrl { get; set; }

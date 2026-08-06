@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using Windows.Globalization;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,22 +21,43 @@ namespace MEmarket_UWP.Services
         private const string DEFAULT_REPO_URL = "http://millenniummarket.ru";
         private const string INDEX_FILE_NAME = "index.json";
 
-        private static readonly Dictionary<string, string> _categoryOrder = new Dictionary<string, string>
+        private static readonly List<string> _categoryOrder = new List<string>
         {
-            {"games", "Игры"},
-            {"store", "Др. магазины приложений"},
-            {"entertaintment", "Развлечения"},
-            {"music+video", "Музыка + Видео"},
-            {"tools", "Инструменты"},
-            {"livestyle", "Лайвстайл"},
-            {"news+weather", "Новости + погода"},
-            {"health+fitness", "Здоровье + фитнес"},
-            {"photo", "Фото"},
-            {"social", "Социальные"},
-            {"sports", "Спорт"},
-            {"business", "Бизнес"},
-            {"education", "Обучение"}
+            "games",
+            "store",
+            "entertaintment",
+            "music+video",
+            "tools", 
+            "livestyle", 
+            "news+weather",
+            "health+fitness",
+            "photo",
+            "social",
+            "sports",
+            "business",
+            "education"
         };
+        
+        private string GetLocalizedCategoryName(string categoryKey)
+        {
+            try
+            {
+                var loader = Windows.ApplicationModel.Resources.ResourceLoader.GetForViewIndependentUse();
+                string safeKey = categoryKey.Replace("+", "_");
+                string resourceKey = "Category_" + safeKey;
+                string localizedName = loader.GetString(resourceKey);
+                if (!string.IsNullOrEmpty(localizedName))
+                {
+                    return localizedName;
+                }
+            }
+            catch { }
+            if (categoryKey == OTHER_CATEGORY_KEY)
+            {
+                return "Прочее";
+            }
+            return categoryKey;
+        }
 
         private static readonly Dictionary<string, string> _categoryGlyphs = new Dictionary<string, string>
         {
@@ -253,15 +276,15 @@ namespace MEmarket_UWP.Services
                 foreach (var cat in categories)
                 {
                     var categoryKey = cat.Name.ToLower();
-                    if (!_categoryOrder.ContainsKey(categoryKey))
+
+                    if (!_categoryOrder.Contains(categoryKey))
                     {
                         categoryKey = OTHER_CATEGORY_KEY;
                     }
+
                     if (!allCategories.ContainsKey(categoryKey))
                     {
-                        var displayName = _categoryOrder.ContainsKey(categoryKey) 
-                            ? _categoryOrder[categoryKey] 
-                            : OTHER_CATEGORY;
+                        var displayName = GetLocalizedCategoryName(categoryKey);
 
                         allCategories[categoryKey] = new CategoryData
                         {
@@ -276,13 +299,12 @@ namespace MEmarket_UWP.Services
             }
 
             var sortedCategories = allCategories.Values
-                .OrderBy(c => 
+                .OrderBy(c =>
                 {
-                    if (c.Name == OTHER_CATEGORY)
+                    if (c.Key == OTHER_CATEGORY_KEY)
                         return int.MaxValue;
-                    
-                    var key = _categoryOrder.FirstOrDefault(x => x.Value == c.Name).Key;
-                    return Array.IndexOf(_categoryOrder.Keys.ToArray(), key);
+
+            return _categoryOrder.IndexOf(c.Key);
                 })
                 .ToList();
 
@@ -354,7 +376,7 @@ namespace MEmarket_UWP.Services
 
                     if (categoryKey == OTHER_CATEGORY_KEY)
                     {
-                        return !_categoryOrder.ContainsKey(appCategoryKey);
+                        return !_categoryOrder.Contains(appCategoryKey);
                     }
                     return appCategoryKey == categoryKey;
                 }));
@@ -488,10 +510,10 @@ namespace MEmarket_UWP.Services
             var downloadUrl = GetJsonString(jsonObj, "download_url");
             var certificateUrl = GetJsonString(jsonObj, "cer_url");
 
-            var summary = GetJsonString(jsonObj, "summary");
+            var summary = GetJsonLocalizedString(jsonObj, "summary");
             if (string.IsNullOrEmpty(summary))
             {
-                summary = GetJsonString(jsonObj, "description");
+                summary = GetJsonLocalizedString(jsonObj, "description");
             }
 
             var appId = explicitId ?? GetJsonString(jsonObj, "id");
@@ -505,7 +527,7 @@ namespace MEmarket_UWP.Services
                 Id = appId,
                 Name = string.IsNullOrEmpty(GetJsonString(jsonObj, "title")) ? GetJsonString(jsonObj, "name") : GetJsonString(jsonObj, "title"),
                 Summary = summary,
-                Description = GetJsonString(jsonObj, "description"),
+                Description = GetJsonLocalizedString(jsonObj, "description"),
                 Publisher = string.IsNullOrEmpty(GetJsonString(jsonObj, "author")) ? GetJsonString(jsonObj, "creator") : GetJsonString(jsonObj, "author"),
                 Size = GetJsonString(jsonObj, "size"),
                 Version = GetJsonString(jsonObj, "version"),
@@ -625,6 +647,73 @@ namespace MEmarket_UWP.Services
                     return value.GetString();
             }
             return string.Empty;
+        }
+
+        private string GetJsonLocalizedString(JsonObject obj, string key)
+        {
+            if (!obj.ContainsKey(key))
+                return string.Empty;
+
+            var value = obj.GetNamedValue(key);
+            if (value.ValueType == JsonValueType.String)
+                return value.GetString();
+
+            if (value.ValueType == JsonValueType.Object)
+            {
+                try
+                {
+                    var localizedObj = value.GetObject();
+                    var preferredLanguage = GetCurrentLanguageCode();
+
+                    if (!string.IsNullOrEmpty(preferredLanguage) && localizedObj.ContainsKey(preferredLanguage))
+                    {
+                        var localizedValue = localizedObj.GetNamedValue(preferredLanguage);
+                        if (localizedValue.ValueType == JsonValueType.String)
+                            return localizedValue.GetString();
+                    }
+
+                    if (localizedObj.ContainsKey("en"))
+                    {
+                        var englishValue = localizedObj.GetNamedValue("en");
+                        if (englishValue.ValueType == JsonValueType.String)
+                            return englishValue.GetString();
+                    }
+
+                    if (localizedObj.ContainsKey("ru"))
+                    {
+                        var russianValue = localizedObj.GetNamedValue("ru");
+                        if (russianValue.ValueType == JsonValueType.String)
+                            return russianValue.GetString();
+                    }
+
+                    foreach (var pair in localizedObj)
+                    {
+                        if (pair.Value.ValueType == JsonValueType.String)
+                            return pair.Value.GetString();
+                    }
+                }
+                catch { }
+            }
+
+            return string.Empty;
+        }
+
+        private string GetCurrentLanguageCode()
+        {
+            var currentLanguage = !string.IsNullOrEmpty(ApplicationLanguages.PrimaryLanguageOverride)
+                ? ApplicationLanguages.PrimaryLanguageOverride
+                : ApplicationLanguages.Languages.FirstOrDefault();
+
+            if (string.IsNullOrEmpty(currentLanguage))
+                return string.Empty;
+
+            if (currentLanguage.StartsWith("ru", StringComparison.OrdinalIgnoreCase))
+                return "ru";
+
+            if (currentLanguage.StartsWith("en", StringComparison.OrdinalIgnoreCase))
+                return "en";
+
+            return currentLanguage.Split('-').FirstOrDefault() ?? string.Empty;
         }
         private string CombineUrls(string baseUrl, string relativePath)
         {
