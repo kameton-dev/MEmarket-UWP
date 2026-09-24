@@ -67,6 +67,10 @@ namespace MEmarket_UWP
 
             _isDescriptionExpanded = false;
 
+            AppBannerSection.Visibility = Visibility.Collapsed;
+            AppBannerImage.Source = null;
+            AppHeaderSection.Margin = new Thickness(16, 16, 16, 0);
+
             AppNameText.Text = _currentApp.Name;
 
             SummaryText.Text = string.IsNullOrEmpty(_currentApp.Summary) ? _currentApp.Description : _currentApp.Summary;
@@ -101,6 +105,8 @@ namespace MEmarket_UWP
                         ? bannerValue
                         : $"ms-appx:///{bannerValue}";
                     AppBannerImage.Source = new BitmapImage(new Uri(uriString, UriKind.Absolute));
+                    AppBannerSection.Visibility = Visibility.Visible;
+                    AppHeaderSection.Margin = new Thickness(16, -36, 16, 0);
                 }
                 catch (Exception ex)
                 {
@@ -109,6 +115,8 @@ namespace MEmarket_UWP
             }
 
             PublisherText.Text = $"{_currentApp.Publisher}";
+
+            UpdateRepositoryAndCategoryDisplay();
 
             /*AppSizeText.Text = $"Размер: {(_currentApp.Size ?? "Неизвестно")}";*/
 
@@ -125,6 +133,41 @@ namespace MEmarket_UWP
             {
                 ScreenshotsScrollViewer.Visibility = Visibility.Collapsed;
             }
+        }
+
+        private void UpdateRepositoryAndCategoryDisplay()
+        {
+            var repository = _dataService?.Repositories?.FirstOrDefault(repo =>
+                string.Equals(repo.Url?.TrimEnd('/'), _currentApp.BaseUrl?.TrimEnd('/'), StringComparison.OrdinalIgnoreCase));
+            var repositoryName = repository?.Name ?? _currentApp.BaseUrl ?? string.Empty;
+
+            var repositoryFormat = loader.GetString("RepoLabelFormat");
+            AppRepoText.Text = string.IsNullOrEmpty(repositoryFormat)
+                ? repositoryName
+                : string.Format(repositoryFormat, repositoryName);
+
+            var categoryKey = (_currentApp.Category ?? string.Empty).Trim().ToLowerInvariant().Replace("+", "_");
+            var categoryName = string.Empty;
+            if (!string.IsNullOrEmpty(categoryKey))
+            {
+                categoryName = loader.GetString("Category_" + categoryKey);
+            }
+
+            if (string.IsNullOrEmpty(categoryName))
+            {
+                categoryName = string.IsNullOrEmpty(_currentApp.Category) ? string.Empty : _currentApp.Category;
+            }
+
+            var categoryFormat = loader.GetString("CategoryLabelFormat");
+            AppCategoryText.Text = string.IsNullOrEmpty(categoryFormat)
+                ? categoryName
+                : string.Format(categoryFormat, categoryName);
+        }
+
+        private void AppBannerImage_ImageFailed(object sender, ExceptionRoutedEventArgs e)
+        {
+            AppBannerSection.Visibility = Visibility.Collapsed;
+            AppHeaderSection.Margin = new Thickness(16, 16, 16, 0);
         }
 
         private async Task LoadEntryJsonAsync(AppItem app)
@@ -154,7 +197,7 @@ namespace MEmarket_UWP
                     var idValue = GetJsonString(root, "id");
                     if (!string.IsNullOrEmpty(idValue))
                     {
-                        app.Id = idValue; // Сохраняем ID приложения для локальной БД
+                        app.Id = idValue;
                     }
 
                     var title = GetJsonString(root, "title");
@@ -468,7 +511,10 @@ namespace MEmarket_UWP
             }
 
             AppTypeText.Visibility = Visibility.Visible;
-            AppTypeText.Text = $"Тип приложения: {_currentApp.AppType}";
+            var appTypeFormat = loader.GetString("AppTypeLabelFormat");
+            AppTypeText.Text = string.IsNullOrEmpty(appTypeFormat)
+                ? _currentApp.AppType
+                : string.Format(appTypeFormat, _currentApp.AppType);
         }
 
         private void ToggleDescriptionButton_Click(object sender, RoutedEventArgs e)

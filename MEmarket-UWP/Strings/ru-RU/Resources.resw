@@ -366,4 +366,13 @@
   <data name="RepoStatusFormat" xml:space="preserve">
     <value>Подключено репозиториев: {0}. Последнее обновление: сегодня</value>
   </data>
+  <data name="AppTypeLabelFormat" xml:space="preserve">
+    <value>Тип приложения: {0}</value>
+  </data>
+  <data name="CategoryLabelFormat" xml:space="preserve">
+    <value>Категория: {0}</value>
+  </data>
+  <data name="RepoLabelFormat" xml:space="preserve">
+    <value>Репозиторий: {0}</value>
+  </data>
 </root>

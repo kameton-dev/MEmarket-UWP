@@ -13,23 +13,19 @@
             <ScrollViewer>
                 <StackPanel>
 
-                    <!-- ВЕРХНИЙ БЛОК: Баннер 16:9 и накладывающийся блок информации -->
                     <Grid Margin="0,0,0,16">
                         <Grid.RowDefinitions>
-                            <!-- Высота баннера. На типичном экране W10M (шириной 360px) высота 202px дает идеальное соотношение 16:9 -->
-                            <RowDefinition Height="202"/>
-                            <!-- Строка для иконки и названия -->
+                            <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <!-- 1. Баннер на всю ширину (Строка 0) -->
-                        <Grid Grid.Row="0" Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}">
+                        <Grid x:Name="AppBannerSection" Grid.Row="0" Height="202" Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}" Visibility="Collapsed">
                             <Image x:Name="AppBannerImage"
                                    Stretch="UniformToFill" 
                                    HorizontalAlignment="Center" 
-                                   VerticalAlignment="Center"/>
+                                VerticalAlignment="Center"
+                                ImageFailed="AppBannerImage_ImageFailed"/>
 
-                            <!-- Мягкий затемняющий градиент внизу баннера, чтобы белый текст читался на любом фоне -->
                             <Border VerticalAlignment="Bottom" Height="80">
                                 <Border.Background>
                                     <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
@@ -40,16 +36,12 @@
                             </Border>
                         </Grid>
 
-                        <!-- 2. Блок иконки и названия (Строка 1) -->
-                        <!-- Отрицательный Margin в -36px выталкивает этот блок вверх, заставляя его налезать на баннер -->
-                        <Grid Grid.Row="1" Margin="16,-36,16,0">
+                        <Grid x:Name="AppHeaderSection" Grid.Row="1" Margin="16,16,16,0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <!-- Квадратная иконка приложения. Обернута в Border с рамкой под цвет фона страницы.
-                                 Это создает красивый "вырез" вокруг иконки, отделяя её от картинки баннера -->
                             <Border Grid.Column="0" Width="80" Height="80" Background="{ThemeResource SystemControlBackgroundAccentBrush}" VerticalAlignment="Center">
                                 <Image x:Name="AppIcon" 
                                        Source="ms-appx:///Assets/StoreLogo.png" 
@@ -64,8 +56,6 @@
                         </Grid>
                     </Grid>
 
-                    <!-- НИЖНИЙ БЛОК: Кнопки, описание и подробности -->
-                    <!-- Переместили боковой отступ 16px сюда для выравнивания всех элементов -->
                     <StackPanel Margin="16,0,16,24">
 
                         
@@ -78,9 +68,9 @@
 
                         <TextBlock x:Uid="DescriptionHeader" Text="Описание" Margin="0,0,0,8" FontSize="24" FontWeight="SemiLight"/>
                         <RichTextBlock x:Name="DescriptionText"/>
-                        <HyperlinkButton x:Name="ToggleDescriptionButton" Content="Развернуть" HorizontalAlignment="Left" Click="ToggleDescriptionButton_Click" Margin="0,0,0,16" Visibility="Collapsed"/>
+                        <HyperlinkButton x:Name="ToggleDescriptionButton" Content="Развернуть" HorizontalAlignment="Left" Click="ToggleDescriptionButton_Click" Visibility="Collapsed"/>
 
-                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Margin="0,0,0,16" Visibility="Collapsed" x:Name="ScreenshotsScrollViewer">
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Margin="16,0,0,0" Visibility="Collapsed" x:Name="ScreenshotsScrollViewer">
                             <ListView x:Name="ScreenshotsListView" Margin="0,0,0,0">
                                 <ListView.ItemsPanel>
                                     <ItemsPanelTemplate>
@@ -95,7 +85,7 @@
                             </ListView>
                         </ScrollViewer>
 
-                        <TextBlock x:Uid="DetailsHeader" Text="ЫЫЫ" Margin="0,0,0,8" FontSize="24" FontWeight="SemiLight" SelectionChanged="TextBlock_SelectionChanged"/>
+                        <TextBlock x:Uid="DetailsHeader" Text="ЫЫЫ" Margin="0,16,0,8" FontSize="24" FontWeight="SemiLight" SelectionChanged="TextBlock_SelectionChanged"/>
 
                         <ComboBox x:Name="VersionComboBox" 
                                   x:Uid="VersionComboBox"
@@ -107,6 +97,10 @@
                                   Header="Версия:">
                         </ComboBox>
                         <TextBlock x:Name="AppVersionText" Text="" Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,8" FontSize="16"/>
+                        <TextBlock x:Name="AppRepoText" Text=" " Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,8" FontSize="16"/>
+                        <TextBlock x:Name="AppCategoryText" Text=" " Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,8" FontSize="16"/>
+                        <TextBlock x:Name="AppTypeText" Text=" " Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,8" FontSize="16"/>
+
 
                         <TextBlock x:Uid="CapabilitiesText" x:Name="CapabilitiesText" Text="Возможности:" Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,8" FontSize="16" Visibility="Collapsed"/>
                         <ItemsControl x:Name="CapabilitiesList" Margin="0,0,0,16" Visibility="Collapsed">
@@ -119,7 +113,6 @@
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
-                        <TextBlock x:Name="AppTypeText" Text="Тип приложения: " Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,16" FontSize="16" Visibility="Collapsed"/>
 
                     </StackPanel>
 
