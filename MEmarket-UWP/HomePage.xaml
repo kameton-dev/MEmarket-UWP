@@ -12,32 +12,26 @@
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <StackPanel Padding="16,16,16,24">
 
-                <!-- Шапка страницы -->
-
-                <!-- БЛОК ВЫБОР РЕДАКЦИИ (Кликабельный баннер) -->
                 <Grid x:Name="FeaturedBanner" 
                       Margin="0,0,0,16" 
-                      Height="160" 
+                      Height="200" 
                       Tapped="FeaturedBanner_Tapped"
-                      Background="{ThemeResource SystemControlHighlightListAccentLowBrush}" >
+                      Background="Black" >
                     <Grid.Clip>
-                        <RectangleGeometry Rect="0,0,1000,160"/>
+                        <RectangleGeometry Rect="0,0,1000,200"/>
                     </Grid.Clip>
-                    <Grid Padding="16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock x:Uid="RecomendText" Text="РЕКОМЕНДУЕМ" FontSize="11" FontWeight="Bold" Opacity="0.6" Margin="0,0,0,4"/>
-                            <TextBlock x:Name="FeaturedAppName" Text="" FontSize="24" FontWeight="SemiBold" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
-                            <TextBlock x:Name="FeaturedAppSummary" Text="" FontSize="13" Opacity="0.8" TextWrapping="Wrap" MaxLines="2" Margin="0,4,0,0"/>
-                        </StackPanel>
-
-                        <!-- Иконка рекомендуемого приложения справа -->
-                        <Image x:Name="FeaturedAppIcon" Grid.Column="1" Width="70" Height="70" VerticalAlignment="Center" Margin="12,0,0,0" Stretch="Uniform"/>
-                    </Grid>
+                    <Image x:Name="FeaturedAppImage"
+                           Stretch="UniformToFill"
+                           ImageFailed="FeaturedAppImage_ImageFailed"/>
+                    <Border VerticalAlignment="Bottom" Height="40" Background="#B8000000" Padding="8,4,8,4">
+                        <TextBlock x:Name="FeaturedAppName"
+                                   Text=""
+                                   Foreground="White"
+                                   FontSize="18"
+                                   VerticalAlignment="Center"
+                                   TextWrapping="NoWrap"
+                                   TextTrimming="CharacterEllipsis"/>
+                    </Border>
                 </Grid>
 
                 <!-- Состояние -->
@@ -58,6 +52,44 @@
                         </StackPanel>
                     </Grid>
                 </Border>
+
+                <ItemsControl x:Name="CategorySectionsList" Margin="0,20,0,0">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="0,0,0,20">
+                                <TextBlock Text="{Binding Name}" FontSize="20" FontWeight="SemiLight" Margin="0,0,0,8"/>
+                                <ListView ItemsSource="{Binding Apps}"
+                                          IsItemClickEnabled="True"
+                                          ItemClick="CategoryApp_ItemClick"
+                                          SelectionMode="None"
+                                          ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                          ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                                    <ListView.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <ItemsStackPanel Orientation="Horizontal"/>
+                                        </ItemsPanelTemplate>
+                                    </ListView.ItemsPanel>
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Width="92" Margin="0,0,12,0">
+                                                <Border Width="82"
+                                                        Height="82"
+                                                        Background="{ThemeResource SystemControlBackgroundAccentBrush}"
+                                                        HorizontalAlignment="Left">
+                                                    <Image Source="{Binding Icon}"
+                                                           Width="82"
+                                                           Height="82"
+                                                           Stretch="Uniform"/>
+                                                </Border>
+                                                <TextBlock Text="{Binding Name}" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxLines="2" FontSize="13" Margin="0,6,0,0" HorizontalAlignment="Left"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
             </StackPanel>
         </ScrollViewer>
 

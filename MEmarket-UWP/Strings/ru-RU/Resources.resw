@@ -123,6 +123,18 @@
   <data name="AddRepositoryButton.Content" xml:space="preserve">
     <value>Добавить</value>
   </data>
+  <data name="NewRepositoryButton.Content" xml:space="preserve">
+    <value>Новый репозиторий</value>
+  </data>
+  <data name="RepoInputDialog.Title" xml:space="preserve">
+    <value>Новый репозиторий</value>
+  </data>
+  <data name="RepoInputDialog.PrimaryButtonText" xml:space="preserve">
+    <value>Добавить</value>
+  </data>
+  <data name="RepoInputDialog.SecondaryButtonText" xml:space="preserve">
+    <value>Отмена</value>
+  </data>
   <data name="AvailableUpd.Text" xml:space="preserve">
     <value>Доступные обновления</value>
   </data>
@@ -147,8 +159,17 @@
   <data name="DetailsHeader.Text" xml:space="preserve">
     <value>Подробности</value>
   </data>
-  <data name="DownloadButton.Content" xml:space="preserve">
+  <data name="DownloadButton" xml:space="preserve">
     <value>Установить</value>
+  </data>
+  <data name="UpdateButton" xml:space="preserve">
+    <value>Обновить</value>
+  </data>
+  <data name="InstalledOnDeviceText.Text" xml:space="preserve">
+    <value>Приложение установлено на устройстве</value>
+  </data>
+  <data name="ForgetInstalledAppButton.Content" xml:space="preserve">
+    <value>Забыть</value>
   </data>
   <data name="DownloadedApps.Text" xml:space="preserve">
     <value>Установленные пакеты</value>
@@ -374,5 +395,14 @@
   </data>
   <data name="RepoLabelFormat" xml:space="preserve">
     <value>Репозиторий: {0}</value>
+  </data>
+  <data name="MinVerDialogFailure" xml:space="preserve">
+    <value>Увы, ваша сборка Windows 10 слишком старая для этого приложения..</value>
+  </data>
+  <data name="MinVerDialogSuccess" xml:space="preserve">
+    <value>Ваша сборка Windows 10 подходит под минимальные требования!</value>
+  </data>
+  <data name="MinVersionLabelFormat" xml:space="preserve">
+    <value>Минимальная версия: </value>
   </data>
 </root>

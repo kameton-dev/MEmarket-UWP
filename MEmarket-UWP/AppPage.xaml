@@ -60,7 +60,12 @@
 
                         
 
-                        <Button x:Uid="DownloadButton" x:Name="DownloadButton" Content="Скачать" Click="Download_Click" Margin="0,0,0,8" HorizontalAlignment="Left" Width="150"/>
+                        <Button x:Uid="DownloadButton" x:Name="DownloadButton" Content=" " Click="Download_Click" Margin="0,0,0,8" HorizontalAlignment="Left" Width="150"/>
+
+                        <StackPanel x:Name="InstallationStatePanel" Visibility="Collapsed" Margin="0,0,0,8">
+                            <TextBlock x:Uid="InstalledOnDeviceText" x:Name="InstalledOnDeviceText" Text="Приложение установлено на устройстве" Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,2"/>
+                            <HyperlinkButton x:Uid="ForgetInstalledAppButton" x:Name="ForgetInstalledAppButton" Content="Забыть" HorizontalAlignment="Left" Padding="0" Click="ForgetInstalledAppButton_Click"/>
+                        </StackPanel>
 
                         <ProgressBar x:Name="DownloadProgressBar" Minimum="0" Maximum="100" Value="0" Height="5" Margin="0,0,0,8" Visibility="Collapsed"/>
 
@@ -87,22 +92,30 @@
 
                         <TextBlock x:Uid="DetailsHeader" Text="ЫЫЫ" Margin="0,16,0,8" FontSize="24" FontWeight="SemiLight" SelectionChanged="TextBlock_SelectionChanged"/>
 
-                        <ComboBox x:Name="VersionComboBox" 
+                        <StackPanel x:Name="MinVersionInfoPanel" Orientation="Horizontal" Margin="0,0,0,5" Visibility="Collapsed">
+                            <TextBlock x:Name="MinVersionText" Text="" Style="{ThemeResource BodyTextBlockStyle}" FontSize="16" VerticalAlignment="Center"/>
+                            <Button x:Name="MinVersionInfoButton" Click="MinVersionInfoButton_Click" Width="36" Height="36" Padding="0" Margin="8,0,0,0" VerticalAlignment="Center" AutomationProperties.Name="Информация о совместимости">
+                                <FontIcon Glyph="&#xE946;" FontSize="16"/>
+                            </Button>
+                        </StackPanel>
+                            <ComboBox x:Name="VersionComboBox" 
                                   x:Uid="VersionComboBox"
                                   PlaceholderText="выбрать версию" 
                                   Visibility="Collapsed" 
                                   SelectionChanged="VersionComboBox_SelectionChanged"
                                   DisplayMemberPath="Version"
-                                  Margin="0,0,0,8"
+                                  Margin="0,0,0,5"
                                   Header="Версия:">
                         </ComboBox>
-                        <TextBlock x:Name="AppVersionText" Text="" Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,8" FontSize="16"/>
-                        <TextBlock x:Name="AppRepoText" Text=" " Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,8" FontSize="16"/>
-                        <TextBlock x:Name="AppCategoryText" Text=" " Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,8" FontSize="16"/>
-                        <TextBlock x:Name="AppTypeText" Text=" " Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,8" FontSize="16"/>
+                        <TextBlock x:Name="AppVersionText" Text="" Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,5" FontSize="16"/>
+                        
+                        
+                        <TextBlock x:Name="AppRepoText" Text=" " Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,5" FontSize="16"/>
+                        <TextBlock x:Name="AppCategoryText" Text=" " Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,5" FontSize="16"/>
+                        <TextBlock x:Name="AppTypeText" Text=" " Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,5" FontSize="16"/>
 
 
-                        <TextBlock x:Uid="CapabilitiesText" x:Name="CapabilitiesText" Text="Возможности:" Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,8" FontSize="16" Visibility="Collapsed"/>
+                        <TextBlock x:Uid="CapabilitiesText" x:Name="CapabilitiesText" Text="Возможности:" Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,5" FontSize="16" Visibility="Collapsed"/>
                         <ItemsControl x:Name="CapabilitiesList" Margin="0,0,0,16" Visibility="Collapsed">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>

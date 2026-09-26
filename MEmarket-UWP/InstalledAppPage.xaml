@@ -12,7 +12,6 @@
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <StackPanel>
 
-                <!-- Обновления -->
                 <StackPanel x:Name="UpdatesSection" Margin="0,8,0,24">
                     <RelativePanel Margin="12,0,12,16">
                         <TextBlock x:Uid="AvailableUpd" Text="Доступные обновления" FontSize="24" FontWeight="SemiLight" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignVerticalCenterWithPanel="True"/>
@@ -41,7 +40,12 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <Image Source="{Binding Icon}" Width="50" Height="50" Margin="0,0,8,0"/>
+                                    <Border Margin="0,0,8,0" Background="{ThemeResource SystemControlBackgroundAccentBrush}" HorizontalAlignment="Left" VerticalAlignment="Top" >
+                                        <Image Source="{Binding Icon}" 
+                                            Width="50" 
+                                            Height="50" 
+                                            ImageFailed="IconImage_ImageFailed"/>
+                                    </Border>
                                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                         <TextBlock Text="{Binding Name}" FontSize="18" VerticalAlignment="Center"/>
                                         <TextBlock Text="{Binding VersionProgress}" Style="{ThemeResource BodyTextBlockStyle}" TextWrapping="Wrap" Opacity="0.8"/>
@@ -62,7 +66,6 @@
                     </ListView>
                 </StackPanel>
 
-                <!-- Установленные приложения -->
                 <StackPanel x:Name="InstalledSection">
                     <TextBlock x:Uid="DownloadedApps" Text="Установленные пакеты" Margin="12,0,12,16"  FontSize="24" FontWeight="SemiLight"/>
                     <TextBlock x:Name="NoAppsTextBlock"
@@ -99,8 +102,12 @@
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <Image Source="{Binding Icon}" Width="50" Height="50" Margin="0,0,8,0"/>
-                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <Border Margin="0,0,8,0" Background="{ThemeResource SystemControlBackgroundAccentBrush}" HorizontalAlignment="Left" VerticalAlignment="Top" >
+                                        <Image Source="{Binding Icon}" 
+                                            Width="50" 
+                                            Height="50" 
+                                            ImageFailed="IconImage_ImageFailed"/>
+                                    </Border>                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                         <TextBlock Text="{Binding Name}" FontSize="18" VerticalAlignment="Center"/>
                                         <TextBlock Text="{Binding InstalledVersionText}" Style="{ThemeResource BodyTextBlockStyle}" TextWrapping="Wrap" Opacity="0.8"/>
                                     </StackPanel>

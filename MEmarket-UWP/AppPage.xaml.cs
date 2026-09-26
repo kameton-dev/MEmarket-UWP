@@ -16,6 +16,7 @@ using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
 using Windows.Web.Http;
@@ -23,7 +24,10 @@ using MEmarket_UWP.Services;
 using MEmarket_UWP.Models;
 using Windows.Data.Json;
 using Windows.Globalization;
+using Windows.System.Profile;
+using Windows.UI;
 using Windows.UI.Xaml.Documents;
+using Windows.UI.Xaml.Automation;
 
 namespace MEmarket_UWP
 {
@@ -35,6 +39,12 @@ namespace MEmarket_UWP
         private DispatcherTimer _downloadAnimationTimer;
         private int _downloadDotCount;
         private bool _isDescriptionExpanded;
+        private Popup _screenshotPopup;
+        private Image _fullScreenScreenshotImage;
+        private TextBlock _screenshotCounterText;
+        private int _currentScreenshotIndex;
+        private double _screenshotSwipeStartX;
+        private bool _isScreenshotAnimating;
 
         private readonly Windows.ApplicationModel.Resources.ResourceLoader loader = Windows.ApplicationModel.Resources.ResourceLoader.GetForCurrentView();
 
@@ -56,8 +66,49 @@ namespace MEmarket_UWP
             if (_currentApp != null)
             {
                 await LoadEntryJsonAsync(_currentApp);
+                await UpdateInstallationStateAsync();
                 UpdateAppInfo();
             }
+        }
+
+        private async Task UpdateInstallationStateAsync()
+        {
+            InstallationStatePanel.Visibility = Visibility.Collapsed;
+            DownloadButton.IsEnabled = true;
+            DownloadButton.Content = loader.GetString("DownloadButton");
+
+            if (_currentApp == null)
+                return;
+
+            var installedApps = await LocalAppsManager.LoadAppsAsync();
+            var installedApp = installedApps.FirstOrDefault(app =>
+                (!string.IsNullOrEmpty(_currentApp.Id) &&
+                    string.Equals(app.Id, _currentApp.Id, StringComparison.OrdinalIgnoreCase)) ||
+                (!string.IsNullOrEmpty(_currentApp.AppUrl) &&
+                    string.Equals(app.AppUrl?.TrimEnd('/'), _currentApp.AppUrl.TrimEnd('/'), StringComparison.OrdinalIgnoreCase)));
+
+            if (installedApp == null)
+                return;
+
+            var isUpToDate = !string.IsNullOrEmpty(_currentApp.Version) &&
+                !string.IsNullOrEmpty(installedApp.InstalledVersion) &&
+                CompareVersionStrings(installedApp.InstalledVersion, _currentApp.Version) >= 0;
+
+            if (isUpToDate)
+            {
+                DownloadButton.IsEnabled = false;
+                InstallationStatePanel.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                DownloadButton.Content = loader.GetString("UpdateButton");
+            }
+        }
+
+        private string GetResourceStringOrDefault(string resourceKey, string fallback)
+        {
+            var value = loader.GetString(resourceKey);
+            return string.IsNullOrEmpty(value) ? fallback : value;
         }
 
         private void UpdateAppInfo()
@@ -231,6 +282,16 @@ namespace MEmarket_UWP
                     if (!string.IsNullOrEmpty(appTypeValue))
                     {
                         app.AppType = appTypeValue;
+                    }
+
+                    var minimumVersionValue = GetJsonString(root, "minimum_version");
+                    if (string.IsNullOrEmpty(minimumVersionValue))
+                    {
+                        minimumVersionValue = GetJsonString(root, "min_ver");
+                    }
+                    if (!string.IsNullOrEmpty(minimumVersionValue))
+                    {
+                        app.MinVersion = minimumVersionValue;
                     }
 
                     var iconValue = GetJsonString(root, "icon");
@@ -489,6 +550,21 @@ namespace MEmarket_UWP
                 MinVersionText.Visibility = Visibility.Collapsed;
             } */
 
+            if (!string.IsNullOrEmpty(_currentApp.MinVersion))
+            {
+                MinVersionInfoPanel.Visibility = Visibility.Visible;
+                MinVersionText.Visibility = Visibility.Visible;
+                MinVersionText.Text = loader.GetString("MinVersionLabelFormat") + _currentApp.MinVersion;
+                MinVersionText.Foreground = IsMinimumVersionSupported(_currentApp.MinVersion)
+                    ? new SolidColorBrush(Colors.Green)
+                    : new SolidColorBrush(Colors.Red);
+            }
+            else
+            {
+                MinVersionInfoPanel.Visibility = Visibility.Collapsed;
+                MinVersionText.Visibility = Visibility.Collapsed;
+            }
+
             if (_currentApp.Capabilities != null && _currentApp.Capabilities.Count > 0)
             {
                 CapabilitiesText.Visibility = Visibility.Visible;
@@ -500,6 +576,47 @@ namespace MEmarket_UWP
                 CapabilitiesText.Visibility = Visibility.Collapsed;
                 CapabilitiesList.Visibility = Visibility.Collapsed;
             }
+        }
+
+        private bool IsMinimumVersionSupported(string minimumVersion)
+        {
+            if (!Version.TryParse(minimumVersion, out var requiredVersion))
+                return false;
+
+            try
+            {
+                var deviceFamilyVersion = ulong.Parse(AnalyticsInfo.VersionInfo.DeviceFamilyVersion);
+                var deviceVersion = new Version(
+                    (int)(deviceFamilyVersion >> 48),
+                    (int)(deviceFamilyVersion >> 32 & 0xFFFF),
+                    (int)(deviceFamilyVersion >> 16 & 0xFFFF),
+                    (int)(deviceFamilyVersion & 0xFFFF));
+
+                return deviceVersion >= requiredVersion;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error reading device OS version: {ex.Message}");
+                return false;
+            }
+        }
+
+        private async void MinVersionInfoButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentApp == null || string.IsNullOrEmpty(_currentApp.MinVersion))
+                return;
+
+            var isSupported = IsMinimumVersionSupported(_currentApp.MinVersion);
+            var dialog = new ContentDialog
+            {
+                Title = isSupported ? "(˶>⩊<˶)" : "૮◞ ‸ ◟ ა",
+                Content = isSupported
+                    ? loader.GetString("MinVerDialogSuccess")
+                    : loader.GetString("MinVerDialogFailure"),
+                PrimaryButtonText = loader.GetString("OkButton")
+            };
+
+            await dialog.ShowAsync();
         }
 
         private void UpdateAppTypeDisplay()
@@ -546,7 +663,26 @@ namespace MEmarket_UWP
                 return;
             }
 
-            await DownloadAndInstallAsync(downloadUrl);
+            DownloadButton.IsEnabled = false;
+            try
+            {
+                await DownloadAndInstallAsync(downloadUrl);
+            }
+            finally
+            {
+                DownloadButton.IsEnabled = true;
+            }
+        }
+
+        private async void ForgetInstalledAppButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new ContentDialog
+            {
+                Title = "Забыть приложение",
+                PrimaryButtonText = loader.GetString("OkButton")
+            };
+
+            await dialog.ShowAsync();
         }
 
         /*
@@ -967,19 +1103,216 @@ namespace MEmarket_UWP
             System.Diagnostics.Debug.WriteLine("эъъээъэъъ");
         }
 
-        private async void Screenshot_Tapped(object sender, TappedRoutedEventArgs e)
+        private void Screenshot_Tapped(object sender, TappedRoutedEventArgs e)
         {
             var image = sender as Image;
-            if (image?.Source is BitmapImage bitmapImage && bitmapImage.UriSource != null)
+            var screenshotUrl = image?.DataContext as string;
+            if (string.IsNullOrEmpty(screenshotUrl) || _currentApp?.Screenshots == null)
             {
-                var dialog = new ContentDialog
-                {
-                    Title = "",
-                    Content = new Image { Source = bitmapImage, Width = 300, Height = 400, Stretch = Stretch.Uniform },
-                    PrimaryButtonText = loader.GetString("CloseButton")
-                };
-                await dialog.ShowAsync();
+                return;
             }
+
+            _currentScreenshotIndex = _currentApp.Screenshots.IndexOf(screenshotUrl);
+            if (_currentScreenshotIndex < 0)
+                return;
+
+            OpenScreenshotPopup();
+        }
+
+        private void OpenScreenshotPopup()
+        {
+            _fullScreenScreenshotImage = new Image
+            {
+                Stretch = Stretch.Uniform,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Stretch,
+                ManipulationMode = ManipulationModes.TranslateX
+            };
+            _fullScreenScreenshotImage.ManipulationStarted += Screenshot_ManipulationStarted;
+            _fullScreenScreenshotImage.ManipulationCompleted += Screenshot_ManipulationCompleted;
+
+            _screenshotCounterText = new TextBlock
+            {
+                Foreground = new SolidColorBrush(Colors.White),
+                FontSize = 16,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Bottom,
+                Margin = new Thickness(0, 0, 0, 20)
+            };
+
+            var closeButton = new Button
+            {
+                Content = new FontIcon { Glyph = "\uE10A", FontSize = 18 },
+                Width = 48,
+                Height = 48,
+                Padding = new Thickness(0),
+                HorizontalAlignment = HorizontalAlignment.Right,
+                VerticalAlignment = VerticalAlignment.Top,
+                Margin = new Thickness(0, 8, 8, 0)
+            };
+            AutomationProperties.SetName(closeButton, "Close");
+            closeButton.Click += CloseScreenshotPopup_Click;
+
+            var previousButton = CreateScreenshotNavigationButton("\uE76B", HorizontalAlignment.Left);
+            previousButton.Click += PreviousScreenshot_Click;
+
+            var nextButton = CreateScreenshotNavigationButton("\uE76C", HorizontalAlignment.Right);
+            nextButton.Click += NextScreenshot_Click;
+
+            var popupContent = new Grid
+            {
+                Width = Window.Current.Bounds.Width,
+                Height = Window.Current.Bounds.Height,
+                Background = new SolidColorBrush(Colors.Black)
+            };
+            popupContent.Children.Add(_fullScreenScreenshotImage);
+            popupContent.Children.Add(previousButton);
+            popupContent.Children.Add(nextButton);
+            popupContent.Children.Add(closeButton);
+            popupContent.Children.Add(_screenshotCounterText);
+
+            _screenshotPopup = new Popup
+            {
+                Child = popupContent,
+                IsLightDismissEnabled = true,
+                IsOpen = true
+            };
+            _screenshotPopup.Closed += ScreenshotPopup_Closed;
+            UpdateScreenshotPopupImage();
+        }
+
+        private Button CreateScreenshotNavigationButton(string glyph, HorizontalAlignment alignment)
+        {
+            var button = new Button
+            {
+                Content = new FontIcon { Glyph = glyph, FontSize = 24 },
+                Width = 36,
+                Height = 56,
+                Padding = new Thickness(0),
+                Background = new SolidColorBrush(Colors.DimGray),
+                Foreground = new SolidColorBrush(Colors.White),
+                BorderBrush = new SolidColorBrush(Colors.Black),
+                BorderThickness = new Thickness(0),
+                HorizontalAlignment = alignment,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+
+            AutomationProperties.SetName(button, alignment == HorizontalAlignment.Left
+                ? "Previous"
+                : "Next");
+            return button;
+        }
+
+        private void UpdateScreenshotPopupImage()
+        {
+            if (_fullScreenScreenshotImage == null || _currentApp?.Screenshots == null ||
+                _currentScreenshotIndex < 0 || _currentScreenshotIndex >= _currentApp.Screenshots.Count)
+            {
+                return;
+            }
+
+            _fullScreenScreenshotImage.Source = new BitmapImage(new Uri(
+                _currentApp.Screenshots[_currentScreenshotIndex], UriKind.Absolute));
+            _screenshotCounterText.Text = $"{_currentScreenshotIndex + 1} / {_currentApp.Screenshots.Count}";
+        }
+
+        private async void PreviousScreenshot_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentScreenshotIndex > 0)
+            {
+                await ChangeScreenshotAsync(-1);
+            }
+        }
+
+        private async void NextScreenshot_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentApp?.Screenshots != null && _currentScreenshotIndex < _currentApp.Screenshots.Count - 1)
+            {
+                await ChangeScreenshotAsync(1);
+            }
+        }
+
+        private void Screenshot_ManipulationStarted(object sender, ManipulationStartedRoutedEventArgs e)
+        {
+            _screenshotSwipeStartX = e.Position.X;
+        }
+
+        private async void Screenshot_ManipulationCompleted(object sender, ManipulationCompletedRoutedEventArgs e)
+        {
+            var swipeDistance = e.Position.X - _screenshotSwipeStartX;
+            if (Math.Abs(swipeDistance) < 60)
+                return;
+
+            if (swipeDistance < 0)
+                await ChangeScreenshotAsync(1);
+            else
+                await ChangeScreenshotAsync(-1);
+        }
+
+        private async Task ChangeScreenshotAsync(int direction)
+        {
+            if (_isScreenshotAnimating || _fullScreenScreenshotImage == null || _currentApp?.Screenshots == null)
+                return;
+
+            var nextIndex = _currentScreenshotIndex + direction;
+            if (nextIndex < 0 || nextIndex >= _currentApp.Screenshots.Count)
+                return;
+
+            _isScreenshotAnimating = true;
+            var transform = new TranslateTransform();
+            _fullScreenScreenshotImage.RenderTransform = transform;
+
+            try
+            {
+                var screenWidth = Window.Current.Bounds.Width;
+                await AnimateScreenshotTransformAsync(transform, direction * -screenWidth);
+
+                _currentScreenshotIndex = nextIndex;
+                _fullScreenScreenshotImage.Source = new BitmapImage(new Uri(
+                    _currentApp.Screenshots[_currentScreenshotIndex], UriKind.Absolute));
+                _screenshotCounterText.Text = $"{_currentScreenshotIndex + 1} / {_currentApp.Screenshots.Count}";
+
+                transform.X = direction * screenWidth;
+                await AnimateScreenshotTransformAsync(transform, 0);
+            }
+            finally
+            {
+                transform.X = 0;
+                _isScreenshotAnimating = false;
+            }
+        }
+
+        private Task AnimateScreenshotTransformAsync(TranslateTransform transform, double targetX)
+        {
+            var completion = new TaskCompletionSource<bool>();
+            var storyboard = new Storyboard();
+            var animation = new DoubleAnimation
+            {
+                To = targetX,
+                Duration = new Duration(TimeSpan.FromMilliseconds(180)),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+            };
+
+            Storyboard.SetTarget(animation, transform);
+            Storyboard.SetTargetProperty(animation, "X");
+            animation.Completed += (sender, args) => completion.TrySetResult(true);
+            storyboard.Children.Add(animation);
+            storyboard.Begin();
+
+            return completion.Task;
+        }
+
+        private void CloseScreenshotPopup_Click(object sender, RoutedEventArgs e)
+        {
+            if (_screenshotPopup != null)
+                _screenshotPopup.IsOpen = false;
+        }
+
+        private void ScreenshotPopup_Closed(object sender, object e)
+        {
+            _screenshotPopup = null;
+            _fullScreenScreenshotImage = null;
+            _screenshotCounterText = null;
         }
 
         private void TextBlock_SelectionChanged(object sender, RoutedEventArgs e)

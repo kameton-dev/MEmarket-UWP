@@ -501,10 +501,17 @@ namespace MEmarket_UWP.Services
 
             var iconValue = GetJsonString(jsonObj, "icon");
             var iconUrl = string.Empty;
+            var bannerValue = GetJsonString(jsonObj, "banner");
+            var bannerUrl = string.Empty;
 
             if (!string.IsNullOrEmpty(iconValue))
             {
                 iconUrl = CombineUrls(appUrl, iconValue);
+            }
+
+            if (!string.IsNullOrEmpty(bannerValue))
+            {
+                bannerUrl = CombineUrls(appUrl, bannerValue);
             }
 
             var downloadUrl = GetJsonString(jsonObj, "download_url");
@@ -529,6 +536,7 @@ namespace MEmarket_UWP.Services
                 Summary = summary,
                 Description = GetJsonLocalizedString(jsonObj, "description"),
                 Publisher = string.IsNullOrEmpty(GetJsonString(jsonObj, "author")) ? GetJsonString(jsonObj, "creator") : GetJsonString(jsonObj, "author"),
+                Banner = bannerUrl,
                 Size = GetJsonString(jsonObj, "size"),
                 Version = GetJsonString(jsonObj, "version"),
                 Category = GetJsonString(jsonObj, "category"),

@@ -142,6 +142,9 @@
     </Compile>
     <Compile Include="Models\TrackedApp.cs" />
     <Compile Include="Models\UpdateChecker.cs" />
+    <Compile Include="RepoInputDialog.xaml.cs">
+      <DependentUpon>RepoInputDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="RepoPropsPage.xaml.cs">
       <DependentUpon>RepoPropsPage.xaml</DependentUpon>
     </Compile>
@@ -219,6 +222,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="InstalledAppPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="RepoInputDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

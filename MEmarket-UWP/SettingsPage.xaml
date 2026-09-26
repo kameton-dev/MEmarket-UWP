@@ -35,21 +35,11 @@
                 <Grid>
                     <ScrollViewer>
                         <StackPanel>
-                            <Grid Margin="12,8,12,8">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBox x:Uid="RepositoryUrlTextBox" x:Name="RepositoryUrlTextBox" 
-                                 PlaceholderText="Введите URL репозитория..."
-                                 Grid.Column="0"
-                                 Margin="0,0,9.5,0"/>
-                                <Button x:Uid="AddRepositoryButton" x:Name="AddRepositoryButton"
-                                Grid.Column="1"
-                                Content="Добавить"
-                                Click="AddRepositoryButton_Click"
-                                MinWidth="100"/>
-                            </Grid>
+                            <Button x:Uid="NewRepositoryButton" x:Name="NewRepositoryButton"
+                                    Content="Новый репозиторий"
+                                    Click="NewRepositoryButton_Click"
+                                    HorizontalAlignment="Left"
+                                    Margin="12,8,12,8"/>
 
                             <ListView x:Name="RepositoriesListBox"
                              Margin="0,0,0,16" Background="{x:Null}"
@@ -87,10 +77,7 @@
                         <TextBlock Text="MEmarket UWP" VerticalAlignment="Center" FontSize="20" FontFamily="Segoe UI Semilight"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                        <!-- Этот блок будет переводиться автоматически на русский/английский -->
                         <TextBlock x:Uid="VersionLabel" Text="Версия" Style="{ThemeResource BodyTextBlockStyle}"/>
-
-                        <!-- Сюда C# код подставит цифры версии из манифеста -->
                         <TextBlock x:Name="AppVersionText" Text="0.0.0.0 (Public Beta)" Style="{ThemeResource BodyTextBlockStyle}" Margin="5,0,0,0"/>
                     </StackPanel>
                     <TextBlock x:Uid="WarningText" Text="Данный клиент находится на этапе разработки. Возможны баги, зависания и микрофризы" Foreground="Red" TextWrapping="Wrap" Margin="0,0,0,8"/>

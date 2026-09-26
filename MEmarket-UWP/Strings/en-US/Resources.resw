@@ -123,6 +123,18 @@
   <data name="AddRepositoryButton.Content" xml:space="preserve">
     <value>Add</value>
   </data>
+  <data name="NewRepositoryButton.Content" xml:space="preserve">
+    <value>New repository</value>
+  </data>
+  <data name="RepoInputDialog.Title" xml:space="preserve">
+    <value>New repository</value>
+  </data>
+  <data name="RepoInputDialog.PrimaryButtonText" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="RepoInputDialog.SecondaryButtonText" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
   <data name="AvailableUpd.Text" xml:space="preserve">
     <value>Available updates</value>
   </data>
@@ -147,8 +159,17 @@
   <data name="DetailsHeader.Text" xml:space="preserve">
     <value>Details</value>
   </data>
-  <data name="DownloadButton.Content" xml:space="preserve">
+  <data name="DownloadButton" xml:space="preserve">
     <value>Install</value>
+  </data>
+  <data name="UpdateButton" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="InstalledOnDeviceText.Text" xml:space="preserve">
+    <value>Application is installed on this device</value>
+  </data>
+  <data name="ForgetInstalledAppButton.Content" xml:space="preserve">
+    <value>Forget</value>
   </data>
   <data name="DownloadedApps.Text" xml:space="preserve">
     <value>Downloaded packages</value>
@@ -368,5 +389,14 @@
   </data>
   <data name="RepoLabelFormat" xml:space="preserve">
     <value>Repository: {0}</value>
+  </data>
+  <data name="MinVerDialogFailure" xml:space="preserve">
+    <value>Unfortunately, your Windows 10 build is too old for this application..</value>
+  </data>
+  <data name="MinVerDialogSuccess" xml:space="preserve">
+    <value>Your Windows 10 build meets the minimum requirements!</value>
+  </data>
+  <data name="MinVersionLabelFormat" xml:space="preserve">
+    <value>Minimum version: </value>
   </data>
 </root>

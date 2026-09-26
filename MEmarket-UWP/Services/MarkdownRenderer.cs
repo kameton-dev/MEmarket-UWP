@@ -67,10 +67,12 @@ namespace MEmarket_UWP.Services
                 }
 
                 // TODO: фикс сепаратор
-                if (trimmed == "---" || trimmed == "***" || trimmed == "___")
+                if (Regex.IsMatch(trimmed, @"^(\*\s*){3,}$") ||
+                    Regex.IsMatch(trimmed, @"^(-\s*){3,}$") ||
+                    Regex.IsMatch(trimmed, @"^(_\s*){3,}$"))
                 {
                     commitParagraph();
-                    target.Blocks.Add(CreateHorizontalRule());
+                    target.Blocks.Add(CreateHorizontalRule(target.ActualWidth));
                     continue;
                 }
 
@@ -185,19 +187,19 @@ namespace MEmarket_UWP.Services
             return p;
         }
 
-        private static Paragraph CreateHorizontalRule()
+        private static Paragraph CreateHorizontalRule(double availableWidth)
         {
             var p = new Paragraph { Margin = new Thickness(0, 10, 0, 10) };
 
-            var border = new Border
+            var separator = new Border
             {
+                Width = availableWidth > 0 ? availableWidth : 300,
                 Height = 1,
-                Background = new SolidColorBrush(Color.FromArgb(50, 128, 128, 128)),
-                HorizontalAlignment = HorizontalAlignment.Stretch
+                Background = new SolidColorBrush(Color.FromArgb(90, 128, 128, 128)),
+                HorizontalAlignment = HorizontalAlignment.Left
             };
 
-            var container = new InlineUIContainer { Child = border };
-            p.Inlines.Add(container);
+            p.Inlines.Add(new InlineUIContainer { Child = separator });
             return p;
         }
 

@@ -1,0 +1,28 @@
+﻿<ContentDialog
+    x:Class="MEmarket_UWP.RepoInputDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:MEmarket_UWP"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    x:Uid="RepoInputDialog"
+    Title="НОВЫЙ РЕПОЗИТОРИЙ"
+    PrimaryButtonText="Ввод"
+    SecondaryButtonText="Отмена"
+    PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
+    SecondaryButtonClick="ContentDialog_SecondaryButtonClick">
+
+    <Grid VerticalAlignment="Top">
+        <StackPanel VerticalAlignment="Top">
+        <TextBox x:Uid="RepositoryUrlTextBox"
+             x:Name="RepositoryUrlTextBox"
+             PlaceholderText="Введите URL репозитория..." Margin="0,8,0,0"/>
+              <TextBlock x:Name="ErrorTextBlock"
+                       Foreground="Red"
+                       TextWrapping="Wrap"
+                       Visibility="Collapsed"
+                       Margin="0,8,0,0"/>
+        </StackPanel>
+    </Grid>
+</ContentDialog>

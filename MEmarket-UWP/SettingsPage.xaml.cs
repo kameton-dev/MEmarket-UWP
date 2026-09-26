@@ -76,33 +76,15 @@ namespace MEmarket_UWP
             localSettings.Values["BackgroundUpdateCheckEnabled"] = BackgroundUpdateToggle.IsOn;
         }
 
-        private async void AddRepositoryButton_Click(object sender, RoutedEventArgs e)
+        private async void NewRepositoryButton_Click(object sender, RoutedEventArgs e)
         {
-            var url = RepositoryUrlTextBox.Text.Trim();
-            
-            if (string.IsNullOrEmpty(url))
+            var dialog = new RepoInputDialog();
+            var result = await dialog.ShowAsync();
+            if (result == ContentDialogResult.Primary)
             {
-                await ShowErrorDialog(loader.GetString("RepoUrlInputMessage"));
-                return;
-            }
-
-            if (!url.StartsWith("http://") && !url.StartsWith("https://"))
-            {
-                await ShowErrorDialog(loader.GetString("RepoUrlError"));
-                return;
-            }
-
-            try
-            {
-                await _dataService.AddRepositoryAsync(url);
-                RepositoryUrlTextBox.Text = "";
                 LoadRepositories();
             }
-            catch (Exception ex)
-            {
-                await ShowErrorDialog(loader.GetString("ErrorText") + " " + ex.Message);
-            }
-        }        
+        }
 
         private void RepositoriesListBox_ItemClick(object sender, ItemClickEventArgs e)
         {
