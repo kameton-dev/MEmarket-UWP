@@ -48,7 +48,6 @@
 
                     <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled">
                         <StackPanel>
-                            <!-- Системные разделы -->
                             <ListView x:Name="SystemNavigationListView" 
                                       IsItemClickEnabled="True" 
                                       ItemClick="SystemNavigationListView_ItemClick"
@@ -79,7 +78,6 @@
 
                             <Border Height="1" Background="{ThemeResource SystemControlForegroundBaseMediumLowBrush}" Opacity="0.3" Margin="16,8,16,8"/>
                             
-                            <!-- Категории -->
                             <ListView x:Name="CategoriesNavigationListView" 
                                       IsItemClickEnabled="True" 
                                       ItemClick="CategoriesNavigationListView_ItemClick"
@@ -110,7 +108,6 @@
                         </StackPanel>
                     </ScrollViewer>
 
-                    <!-- Настройки -->
                     <ListView x:Name="SettingsNavigationListView" Grid.Row="1" IsItemClickEnabled="True" ItemClick="SettingsNavigationListView_ItemClick" ScrollViewer.VerticalScrollMode="Disabled"
                               ItemContainerStyle="{StaticResource NavigationListViewItemStyle}">
                         <ListView.ItemTemplate>
@@ -137,7 +134,6 @@
                 </Grid>
             </SplitView.Pane>
 
-            <!-- Контент фрейм -->
             <SplitView.Content>
                 <Grid>
                     <Frame x:Name="ContentFrame" x:FieldModifier="public" Navigated="ContentFrame_Navigated"/>

@@ -220,9 +220,6 @@ namespace MEmarket_UWP
             SystemNavigationManager.GetForCurrentView().BackRequested -= MainPage_BackRequested;
         }
 
-        // --- МЕТОДЫ ФОНОВОЙ ПРОВЕРКИ И СИСТЕМНОГО ОПОВЕЩЕНИЯ ---
-
-        // 1. Асинхронная фоновая проверка обновлений
         private async Task CheckForUpdatesInBackgroundAsync()
         {
             try
@@ -265,7 +262,6 @@ namespace MEmarket_UWP
             }
         }
 
-        // 2. Создание и показ системного Toast-уведомления
         private void ShowSystemToastNotification(string appName, string newVersion)
         {
             try

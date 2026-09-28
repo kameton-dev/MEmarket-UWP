@@ -169,8 +169,6 @@ namespace MEmarket_UWP
 
             UpdateRepositoryAndCategoryDisplay();
 
-            /*AppSizeText.Text = $"Размер: {(_currentApp.Size ?? "Неизвестно")}";*/
-
             UpdateVersionDisplay();
             UpdateCertificateAndMinVersionDisplay();
             UpdateAppTypeDisplay();
@@ -538,16 +536,6 @@ namespace MEmarket_UWP
             else
             {
                 DownloadCerButton.Visibility = Visibility.Collapsed;
-            } 
-
-            if (!string.IsNullOrEmpty(_currentApp.MinVersion))
-            {
-                MinVersionText.Visibility = Visibility.Visible;
-                MinVersionText.Text = $"Мин. версия: {_currentApp.MinVersion}";
-            }
-            else
-            {
-                MinVersionText.Visibility = Visibility.Collapsed;
             } */
 
             if (!string.IsNullOrEmpty(_currentApp.MinVersion))
@@ -676,13 +664,40 @@ namespace MEmarket_UWP
 
         private async void ForgetInstalledAppButton_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new ContentDialog
+            if (_currentApp == null)
+                return;
+
+            var messageTemplate = loader.GetString("ForgetConfirmMessage");
+            var formattedMessage = string.Format(messageTemplate, _currentApp.Name);
+            var confirmDialog = new ContentDialog
             {
-                Title = "Забыть приложение",
-                PrimaryButtonText = loader.GetString("OkButton")
+                Title = "【・_・?】",
+                Content = formattedMessage,
+                PrimaryButtonText = loader.GetString("OkButton"),
+                SecondaryButtonText = loader.GetString("CancelButton")
             };
 
-            await dialog.ShowAsync();
+            var result = await confirmDialog.ShowAsync();
+            if (result != ContentDialogResult.Primary)
+                return;
+
+            try
+            {
+                var installedApps = await LocalAppsManager.LoadAppsAsync();
+                installedApps.RemoveAll(app =>
+                    (!string.IsNullOrEmpty(_currentApp.Id) &&
+                        string.Equals(app.Id, _currentApp.Id, StringComparison.OrdinalIgnoreCase)) ||
+                    (!string.IsNullOrEmpty(_currentApp.AppUrl) &&
+                        string.Equals(app.AppUrl?.TrimEnd('/'), _currentApp.AppUrl.TrimEnd('/'), StringComparison.OrdinalIgnoreCase)));
+
+                await LocalAppsManager.SaveAppsAsync(installedApps);
+                await UpdateInstallationStateAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка при удалении приложения из локальной БД: {ex.Message}");
+                await ShowDialogAsync(loader.GetString("ErrorText"), ex.Message);
+            }
         }
 
         /*
